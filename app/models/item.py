@@ -1,0 +1,1 @@
+# modelo SQLAlchemy para itens
