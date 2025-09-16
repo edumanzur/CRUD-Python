@@ -1,1 +1,1 @@
-# Desenvolvimento das operações CRUD para itens
+# Desenvolvimento das operações CRUD
