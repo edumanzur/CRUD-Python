@@ -1,31 +1,49 @@
-# Ponto de entrada da aplicação
+# Código main
 
-# Importa FastAPI e middleware CORS (Conexão com frontend)
-from fastapi import FastAPI
-from fastapi.middleware.cors import CORSMiddleware
+# Comandos CRUD da pasta crud/livros.py
+from crud import criar_tabela, criar_livro, listar_livros, atualizar_livro, deletar_livro 
 
-# Importa os routers
-from app.routers import biblioteca
+# Criar a tabela de livros
+criar_tabela()
 
-app = FastAPI(
-    title="Biblioteca API",
-    description="Uma API CRUD simples usando FastAPI + SQLite",
-    version="1.0.0"
-)
+# variável para controle do loop
+continuar = True
 
-# Configuração do CORS (permite que frontend acesse sua API)
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=["*"],  # permite todos (especificar o domínio do frontend)
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
+# Loop principal do menu
+while continuar:
 
-# Rota inicial (teste)
-@app.get("/")
-def read_root():
-    return {"message": "Bem-vindo à Biblioteca API!"}
+    # Exibir o menu
+    print("\n--- Menu Principal ---")
+    print("1. Criar Livro")
+    print("2. Listar Livros")
+    print("3. Atualizar Livro")
+    print("4. Deletar Livro")
+    print("0. Sair")
+    opcao = input("Escolha uma opção: ")
 
-# Inclui as rotas do módulo biblioteca
-# app.include_router(biblioteca.router, prefix="/biblioteca", tags=["Biblioteca"])
+    # Executar a opção escolhida
+    if opcao == "1":
+        # Criar um livro
+        criar_livro()
+
+    elif opcao == "2":
+        # Listar os livros
+        listar_livros()
+
+    elif opcao == "3":
+        # Atualizar um livro
+        atualizar_livro()
+
+    elif opcao == "4":
+        # Deletar um livro
+        deletar_livro()
+
+    elif opcao == "0":
+        # Terminar loop
+        print("Saindo do programa...")
+        continuar = False
+
+    else:
+        # Opção inválida
+        print("Opção inválida. Tente novamente.")
+        
