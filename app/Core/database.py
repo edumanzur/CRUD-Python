@@ -19,21 +19,12 @@ def criar_tabelas():
         Autor VARCHAR(30),
         Preco REAL);
     '''
-
-    sql_Estoque = '''
-        CREATE TABLE IF NOT EXISTS Estoque(
-        ID_Estoque INTEGER PRIMARY KEY,
-        Nome VARCHAR(30) NOT NULL,
-        Autor VARCHAR(30),
-        Quantidade INTEGER);
-    '''
     
     conexao = None
     try:
         conexao = conectar_banco()
         cursor = conexao.cursor()
         cursor.execute(sql_Livros)
-        cursor.execute(sql_Estoque)
         conexao.commit()
         print("Tabelas criadas com sucesso!")
     except con.DatabaseError as erro:

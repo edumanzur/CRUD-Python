@@ -1,129 +1,99 @@
-import tkinter as tk
-from tkinter import messagebox
-import sqlite3 as con
-from Core.database import conectar_banco, fechar_conexao
-from crud.livros import criar_tabela
+import os
+import sys
+from crud.livros import criar_tabela, criar_livro, listar_livros, atualizar_livro, deletar_livro
 
-# Função para inserir livro no banco de dados
-def inserir_livro(entry_nome_livro, entry_autor_livro, entry_preco_livro):
-    nome = entry_nome_livro.get()
-    autor = entry_autor_livro.get()
-    preco = entry_preco_livro.get()
+def limpar_tela():
+    """Limpa a tela do terminal"""
+    os.system('cls' if os.name == 'nt' else 'clear')
 
-    if nome and autor and preco:
-        try:
-            preco = float(preco)  # Convertendo para tipo float
-            conexao = conectar_banco()
-            cursor = conexao.cursor()
+def exibir_menu():
+    """Exibe o menu principal do sistema"""
+    print("\n" + "="*50)
+    print("        SISTEMA DE GERENCIAMENTO DE LIVROS")
+    print("="*50)
+    print("1. Criar novo livro")
+    print("2. Listar todos os livros")
+    print("3. Atualizar livro")
+    print("4. Deletar livro")
+    print("5. Sair")
+    print("="*50)
 
-            cursor.execute("INSERT INTO Livros (Nome, Autor, Preco) VALUES (?, ?, ?)", (nome, autor, preco))
-            conexao.commit()
+def obter_opcao():
+    """Obtém a opção do usuário com validação"""
+    try:
+        opcao = input("Digite sua opção (1-5): ").strip()
+        return opcao
+    except KeyboardInterrupt:
+        print("\n\nPrograma interrompido pelo usuário.")
+        sys.exit(0)
 
-            # Limpar os campos após a inserção
-            entry_nome_livro.delete(0, tk.END)
-            entry_autor_livro.delete(0, tk.END)
-            entry_preco_livro.delete(0, tk.END)
+def pausar():
+    """Pausa a execução até o usuário pressionar Enter"""
+    try:
+        input("\nPressione Enter para continuar...")
+    except KeyboardInterrupt:
+        print("\n\nPrograma interrompido pelo usuário.")
+        sys.exit(0)
 
-            messagebox.showinfo("Sucesso", "Livro inserido com sucesso!")
-        except con.DatabaseError as erro:
-            messagebox.showerror("Erro", f"Erro ao inserir livro: {erro}")
-        except ValueError:
-            messagebox.showerror("Erro", "Preço deve ser um número válido!")
-        finally:
-            fechar_conexao(conexao)
-    else:
-        messagebox.showwarning("Aviso", "Por favor, preencha todos os campos!")
-
-# Função para inserir estoque no banco de dados
-def inserir_estoque(entry_nome_estoque, entry_autor_estoque, entry_quantidade_estoque):
-    nome = entry_nome_estoque.get()
-    autor = entry_autor_estoque.get()
-    quantidade = entry_quantidade_estoque.get()
-
-    if nome and autor and quantidade:
-        try:
-            quantidade = int(quantidade)  # Convertendo para tipo inteiro
-            conexao = conectar_banco()
-            cursor = conexao.cursor()
-
-            cursor.execute("INSERT INTO Estoque (Nome, Autor, Quantidade) VALUES (?, ?, ?)", (nome, autor, quantidade))
-            conexao.commit()
-
-            # Limpar os campos após a inserção
-            entry_nome_estoque.delete(0, tk.END)
-            entry_autor_estoque.delete(0, tk.END)
-            entry_quantidade_estoque.delete(0, tk.END)
-
-            messagebox.showinfo("Sucesso", "Estoque inserido com sucesso!")
-        except con.DatabaseError as erro:
-            messagebox.showerror("Erro", f"Erro ao inserir estoque: {erro}")
-        except ValueError:
-            messagebox.showerror("Erro", "Quantidade deve ser um número inteiro válido!")
-        finally:
-            fechar_conexao(conexao)
-    else:
-        messagebox.showwarning("Aviso", "Por favor, preencha todos os campos!")
-
-# Função principal que cria a interface gráfica
 def main():
-    # Criar as tabelas no banco de dados
-    criar_tabela()
-
-    # Criar a janela principal
-    root = tk.Tk()
-    root.title("Cadastro de Livros e Estoque")
-    root.geometry("400x400")
-
-    # Criar os widgets para inserir dados do livro
-    label_nome_livro = tk.Label(root, text="Nome do Livro")
-    label_nome_livro.pack()
-    entry_nome_livro = tk.Entry(root)
-    entry_nome_livro.pack()
-
-    label_autor_livro = tk.Label(root, text="Autor do Livro")
-    label_autor_livro.pack()
-    entry_autor_livro = tk.Entry(root)
-    entry_autor_livro.pack()
-
-    label_preco_livro = tk.Label(root, text="Preço do Livro")
-    label_preco_livro.pack()
-    entry_preco_livro = tk.Entry(root)
-    entry_preco_livro.pack()
-
-    # Botão para inserir livro
-    button_inserir_livro = tk.Button(
-        root, 
-        text="Inserir Livro", 
-        command=lambda: inserir_livro(entry_nome_livro, entry_autor_livro, entry_preco_livro)
-    )
-    button_inserir_livro.pack()
-
-    # Criar os widgets para inserir dados do estoque
-    label_nome_estoque = tk.Label(root, text="Nome do Estoque")
-    label_nome_estoque.pack()
-    entry_nome_estoque = tk.Entry(root)
-    entry_nome_estoque.pack()
-
-    label_autor_estoque = tk.Label(root, text="Autor do Estoque")
-    label_autor_estoque.pack()
-    entry_autor_estoque = tk.Entry(root)
-    entry_autor_estoque.pack()
-
-    label_quantidade_estoque = tk.Label(root, text="Quantidade no Estoque")
-    label_quantidade_estoque.pack()
-    entry_quantidade_estoque = tk.Entry(root)
-    entry_quantidade_estoque.pack()
-
-    # Botão para inserir estoque
-    button_inserir_estoque = tk.Button(
-        root, 
-        text="Inserir Estoque", 
-        command=lambda: inserir_estoque(entry_nome_estoque, entry_autor_estoque, entry_quantidade_estoque)
-    )
-    button_inserir_estoque.pack()
-
-    # Iniciar a interface gráfica
-    root.mainloop()
+    """Função principal do programa"""
+    # Inicializar o banco de dados
+    print("Inicializando sistema...")
+    try:
+        criar_tabela()
+        print("Sistema inicializado com sucesso!")
+    except Exception as e:
+        print(f"Erro ao inicializar sistema: {e}")
+        sys.exit(1)
+    
+    # Loop principal do programa
+    while True:
+        try:
+            limpar_tela()
+            exibir_menu()
+            opcao = obter_opcao()
+            
+            if opcao == '1':
+                limpar_tela()
+                print("--- CRIAR NOVO LIVRO ---")
+                criar_livro()
+                pausar()
+                
+            elif opcao == '2':
+                limpar_tela()
+                print("--- LISTAR TODOS OS LIVROS ---")
+                listar_livros()
+                pausar()
+                
+            elif opcao == '3':
+                limpar_tela()
+                print("--- ATUALIZAR LIVRO ---")
+                atualizar_livro()
+                pausar()
+                
+            elif opcao == '4':
+                limpar_tela()
+                print("--- DELETAR LIVRO ---")
+                deletar_livro()
+                pausar()
+                
+            elif opcao == '5':
+                limpar_tela()
+                print("Obrigado por usar o Sistema de Gerenciamento de Livros!")
+                print("Até logo!")
+                break
+                
+            else:
+                print("Opção inválida! Por favor, escolha uma opção entre 1 e 5.")
+                pausar()
+                
+        except KeyboardInterrupt:
+            print("\n\nPrograma interrompido pelo usuário.")
+            print("Até logo!")
+            break
+        except Exception as e:
+            print(f"Erro inesperado: {e}")
+            pausar()
 
 if __name__ == "__main__":
     main()
