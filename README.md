@@ -124,41 +124,8 @@ O sistema utiliza SQLite com a seguinte estrutura:
 - **Confirmação de ações**: Confirmação antes de operações destrutivas
 - **Tratamento de interrupções**: Captura de Ctrl+C para saída elegante
 
-## 🔮 Roadmap Futuro
-
-O projeto está preparado para evolução, com estrutura para:
-
-- 🌐 **API RESTful**: Usando FastAPI (estrutura já preparada)
-- 📱 **Interface Web**: Frontend para o sistema
-- 🔐 **Autenticação**: Sistema de usuários
-- 📈 **Relatórios**: Geração de relatórios e estatísticas
-- 🔍 **Busca Avançada**: Filtros e pesquisa por campos
-
-## 🤝 Contribuição
-
-Contribuições são bem-vindas! Para contribuir:
-
-1. Faça um fork do projeto
-2. Crie uma branch para sua feature (`git checkout -b feature/AmazingFeature`)
-3. Faça commit das suas mudanças (`git commit -m 'Add some AmazingFeature'`)
-4. Faça push para a branch (`git push origin feature/AmazingFeature`)
-5. Abra um Pull Request
-
-## 📝 Licença
-
-Este projeto está sob a licença MIT. Veja o arquivo `LICENSE` para mais detalhes.
-
 ## 👨‍💻 Autor
 
 **Eduardo Manzur**
 - GitHub: [@edumanzur](https://github.com/edumanzur)
-
-## 📞 Suporte
-
-Se você encontrar algum problema ou tiver sugestões, por favor:
-- Abra uma [issue](https://github.com/edumanzur/CRUD-Python/issues)
-- Entre em contato através do GitHub
-
----
-
-⭐ Se este projeto foi útil para você, considere dar uma estrela no repositório!
+**Guilherme Viera**
