@@ -129,3 +129,4 @@ O sistema utiliza SQLite com a seguinte estrutura:
 **Eduardo Manzur**
 - GitHub: [@edumanzur](https://github.com/edumanzur)
 **Guilherme Viera**
+- GitHub: [@GUILHERME-LA](https://github.com/GUILHERME-LA)
