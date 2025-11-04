@@ -1,1 +1,0 @@
-# Rotas organizadas com APIRouter
