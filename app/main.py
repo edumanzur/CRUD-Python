@@ -39,6 +39,12 @@ class MagiasModel(Base):
     Id = Column(Integer, primary_key=True, index=True)
     Nome = Column(String, nullable=False)
     Descricao = Column(Text)
+    Categoria = Column(String)
+    Nivel = Column(Integer)
+    Icone = Column(String)
+    CustoMana = Column(Integer)
+    Cooldown = Column(Integer)
+    Efeito = Column(Text)
 
 
 class HabilidadesModel(Base):
@@ -46,6 +52,11 @@ class HabilidadesModel(Base):
     Id = Column(Integer, primary_key=True, index=True)
     Nome = Column(String, nullable=False)
     Descricao = Column(Text)
+    Tipo = Column(String)
+    Cooldown = Column(Integer)
+    Icone = Column(String)
+    Efeito = Column(Text)
+    Dano = Column(Integer)
 
 
 class ClasseModel(Base):
@@ -67,6 +78,22 @@ class PersonagensModel(Base):
     Nome = Column(String, nullable=False)
     Historia = Column(Text)
     Tendencia = Column(String)
+    Level = Column(Integer, default=1)
+    # Novos status
+    Vida = Column(Integer, default=100)
+    Forca = Column(Integer, default=10)
+    Destreza = Column(Integer, default=10)
+    Constituicao = Column(Integer, default=10)
+    Inteligencia = Column(Integer, default=10)
+    Sabedoria = Column(Integer, default=10)
+    Mana = Column(Integer, default=100)
+    Carisma = Column(Integer, default=10)
+    Sorte = Column(Integer, default=10)
+    Reputacao = Column(Integer, default=0)
+    CA = Column(Integer, default=10)  # Classe de Armadura
+    Deslocamento = Column(Integer, default=30)  # Velocidade de movimento
+    Classe_Nome = Column(String, default="Guerreiro")  # Nome da classe do personagem
+    Raca_Nome = Column(String, default="Humano")  # Nome da raça do personagem
     Raca_id = Column(Integer, ForeignKey("Racas.Id"), nullable=True)
     Classe_id = Column(Integer, ForeignKey("Classe.Id"), nullable=True)
     Equipamento_id = Column(Integer, ForeignKey("Equipamentos.Id"), nullable=True)
@@ -102,7 +129,13 @@ class EquipamentosModel(Base):
     Id = Column(Integer, primary_key=True, index=True)
     Nome = Column(String, nullable=False)
     Descricao = Column(Text)
+    Tipo = Column(String)  # weapon, armor, accessory, consumable, tool
+    Raridade = Column(String)  # common, uncommon, rare, epic, legendary
+    Icone = Column(String)
+    Ataque = Column(Integer)
+    Defesa = Column(Integer)
     Bonus = Column(Integer)
+    Peso = Column(Integer)
 
     personagens = relationship("PersonagensModel", back_populates="equipamento")
 
@@ -114,6 +147,12 @@ class MagiaSchema(BaseModel):
     Id: int
     Nome: str
     Descricao: Optional[str] = None
+    Categoria: Optional[str] = None
+    Nivel: Optional[int] = None
+    Icone: Optional[str] = None
+    CustoMana: Optional[int] = None
+    Cooldown: Optional[int] = None
+    Efeito: Optional[str] = None
     model_config = {"from_attributes": True}
 
 
@@ -121,6 +160,11 @@ class HabilidadeSchema(BaseModel):
     Id: int
     Nome: str
     Descricao: Optional[str] = None
+    Tipo: Optional[str] = None
+    Cooldown: Optional[int] = None
+    Icone: Optional[str] = None
+    Efeito: Optional[str] = None
+    Dano: Optional[int] = None
     model_config = {"from_attributes": True}
 
 
@@ -153,7 +197,13 @@ class EquipamentoSchema(BaseModel):
     Id: int
     Nome: str
     Descricao: Optional[str] = None
-    Bonus: int
+    Tipo: Optional[str] = None
+    Raridade: Optional[str] = None
+    Icone: Optional[str] = None
+    Ataque: Optional[int] = None
+    Defesa: Optional[int] = None
+    Bonus: Optional[int] = None
+    Peso: Optional[int] = None
     model_config = {"from_attributes": True}
 
 
@@ -162,10 +212,28 @@ class PersonagemSchema(BaseModel):
     Nome: str
     Historia: Optional[str] = None
     Tendencia: Optional[str] = None
+    Level: Optional[int] = 1
+    # Novos status
+    Vida: Optional[int] = 100
+    Forca: Optional[int] = 10
+    Destreza: Optional[int] = 10
+    Constituicao: Optional[int] = 10
+    Inteligencia: Optional[int] = 10
+    Sabedoria: Optional[int] = 10
+    Mana: Optional[int] = 100
+    Carisma: Optional[int] = 10
+    Sorte: Optional[int] = 10
+    Reputacao: Optional[int] = 0
+    CA: Optional[int] = 10  # Classe de Armadura
+    Deslocamento: Optional[int] = 30
+    Classe_Nome: Optional[str] = "Guerreiro"  # Nome da classe do personagem
+    Raca_Nome: Optional[str] = "Humano"  # Nome da raça do personagem
     raca: Optional[RacaSchema] = None
     classe: Optional[ClasseSchema] = None
     equipamento: Optional[EquipamentoSchema] = None
     atributos: Optional[List[AtributoSchema]] = None
+    magias: Optional[List[MagiaSchema]] = None
+    habilidades: Optional[List[HabilidadeSchema]] = None
     model_config = {"from_attributes": True}
 
 
@@ -200,7 +268,9 @@ def criar_rotas_crud(model, schema, prefix: str):
 
     @app.post(f"/{prefix}/", response_model=schema)
     def criar(item: schema = Body(...), db: Session = Depends(get_db)):
-        db_item = model(**item.model_dump())
+        # Excluir Id e relationships ao criar um novo item
+        item_data = item.model_dump(exclude={'Id', 'magias', 'habilidades', 'equipamentos', 'atributos', 'raca', 'classe', 'equipamento', 'personagens', 'personagens_equipados'})
+        db_item = model(**item_data)
         db.add(db_item)
         db.commit()
         db.refresh(db_item)
@@ -211,7 +281,8 @@ def criar_rotas_crud(model, schema, prefix: str):
         db_item = db.query(model).filter(model.Id == item_id).first()
         if not db_item:
             raise HTTPException(status_code=404, detail=f"{prefix} não encontrado")
-        for key, value in item.model_dump().items():
+        # Excluir Id e só atualizar campos enviados
+        for key, value in item.model_dump(exclude={'Id'}, exclude_unset=True).items():
             setattr(db_item, key, value)
         db.commit()
         db.refresh(db_item)
@@ -237,6 +308,30 @@ criar_rotas_crud(ClasseModel, ClasseSchema, "classes")
 criar_rotas_crud(AtributosModel, AtributoSchema, "atributos")
 criar_rotas_crud(EquipamentosModel, EquipamentoSchema, "equipamentos")
 criar_rotas_crud(PersonagensModel, PersonagemSchema, "personagens")
+
+# ============================================================
+# INCLUIR ROUTER DE MAGIAS E HABILIDADES DE PERSONAGENS
+# ============================================================
+try:
+    from app.routers.personagens_magias_habilidades import router as personagens_magias_habilidades_router
+    app.include_router(personagens_magias_habilidades_router)
+    print("✅ Router de personagens_magias_habilidades carregado com sucesso!")
+except ImportError as e:
+    print(f"❌ Erro ao carregar router de personagens_magias_habilidades: {e}")
+except Exception as e:
+    print(f"❌ Erro inesperado ao carregar router: {e}")
+
+# ============================================================
+# INCLUIR ROUTER DE EQUIPAMENTOS DE PERSONAGENS
+# ============================================================
+try:
+    from app.routers.personagens_equipamentos import router as personagens_equipamentos_router
+    app.include_router(personagens_equipamentos_router)
+    print("✅ Router de personagens_equipamentos carregado com sucesso!")
+except ImportError as e:
+    print(f"❌ Erro ao carregar router de personagens_equipamentos: {e}")
+except Exception as e:
+    print(f"❌ Erro inesperado ao carregar router de equipamentos: {e}")
 
 
 # ============================================================

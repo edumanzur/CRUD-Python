@@ -1,0 +1,14 @@
+# Core Framework
+fastapi==0.115.4
+uvicorn[standard]==0.32.0
+
+# Validation & Settings
+pydantic==2.9.2
+pydantic-settings==2.5.2
+
+# Database
+sqlalchemy==2.0.36
+
+# Development Tools (opcional)
+# pytest==8.3.3
+# httpx==0.27.2
