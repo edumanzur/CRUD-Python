@@ -1,10 +1,17 @@
-# ⚔️ RPG System - Sistema de Gerenciamento de Personagens
-
 <div align="center">
 
-![RPG System Banner](https://img.icons8.com/color/256/crossed-swords.png)
+# ⚔️ RPG System ⚔️
+### Sistema de Gerenciamento de Personagens de RPG
 
-**Sistema completo de gerenciamento de personagens de RPG com CRUD full-stack**
+```
+╔═══════════════════════════════════════════════════════════╗
+║                                                           ║
+║   ⚔️  🛡️  🎲  Sistema CRUD Full-Stack  🎲  🛡️  ⚔️      ║
+║                                                           ║
+║     FastAPI  •  React  •  TypeScript  •  SQLite         ║
+║                                                           ║
+╚═══════════════════════════════════════════════════════════╝
+```
 
 [![FastAPI](https://img.shields.io/badge/FastAPI-005571?style=for-the-badge&logo=fastapi)](https://fastapi.tiangolo.com/)
 [![React](https://img.shields.io/badge/React-20232A?style=for-the-badge&logo=react&logoColor=61DAFB)](https://reactjs.org/)
@@ -24,9 +31,9 @@
 - 🎭 **Gerenciamento Completo de Personagens**: 12 status diferentes, classes, raças e tendências
 - ⚔️ **Sistema de Classes**: 12 classes jogáveis (Guerreiro, Mago, Ladino, etc.)
 - 🧝 **Sistema de Raças**: 9 raças disponíveis (Humano, Elfo, Anão, etc.)
-- � **Estatísticas Detalhadas**: Vida, Força, Destreza, Constituição, Inteligência, Sabedoria, Mana, Carisma, Sorte, Reputação, CA, Deslocamento
+- 📊 **Estatísticas Detalhadas**: Vida, Força, Destreza, Constituição, Inteligência, Sabedoria, Mana, Carisma, Sorte, Reputação, CA, Deslocamento
 - 🔮 **Magias e Habilidades**: Sistema completo de gerenciamento de magias e habilidades
-- �️ **Equipamentos**: Gestão de armas, armaduras e acessórios
+- 🛡️ **Equipamentos**: Gestão de armas, armaduras e acessórios
 - ⚖️ **Sistema de Tendências**: 9 alinhamentos baseados em D&D
 - 🎨 **Interface Temática**: Design inspirado em RPGs clássicos com fonte medieval
 
@@ -40,21 +47,21 @@ CRUD-Python/
 │   ├── routers/                # Endpoints da API
 │   ├── database.py             # Config do banco
 │   ├── config.py               # Configurações
-│   ├── main_new.py             # App principal (NOVO)
-│   └── main.py                 # App antigo (compatibilidade)
+│   └── main.py                 # App principal
 ├── frontend/                   # Frontend (React)
 │   ├── src/
 │   │   ├── components/         # Componentes React
 │   │   ├── pages/              # Páginas da aplicação
 │   │   ├── types/              # TypeScript types
-│   │   ├── hooks/              # Custom hooks
+│   │   ├── services/           # API services
 │   │   └── lib/                # Utilitários
 │   └── public/                 # Assets estáticos
+├── sistema_rpg.db              # Banco de dados SQLite
 ├── run.py                      # Script de inicialização
 └── requirements.txt            # Dependências Python
 ```
 
-## 🚀 Começando
+## 🚀 Instalação e Execução
 
 ### Pré-requisitos
 
@@ -62,7 +69,7 @@ CRUD-Python/
 - Node.js 18+ / Bun
 - Git
 
-### 🔧 Instalação
+### � Instalação
 
 #### 1. Clone o repositório
 ```bash
@@ -70,36 +77,51 @@ git clone https://github.com/edumanzur/CRUD-Python.git
 cd CRUD-Python
 ```
 
-#### 2. Configure o Backend
+#### 2. Instale as dependências do Backend
 ```bash
-# Instale as dependências
 pip install -r requirements.txt
-
-# Inicie o servidor
-python run.py
-
-# OU manualmente:
-python -m uvicorn app.main_new:app --reload --port 8000
 ```
 
-O backend estará rodando em: http://localhost:8000
-- Documentação: http://localhost:8000/docs
-- API alternativa: http://localhost:8000/redoc
-
-#### 3. Configure o Frontend
+#### 3. Instale as dependências do Frontend
 ```bash
 cd frontend
-
-# Com npm
 npm install
-npm run dev
-
 # OU com Bun (mais rápido)
 bun install
-bun run dev
 ```
 
-O frontend estará rodando em: http://localhost:5173
+### ▶️ Executando o Projeto
+
+#### Opção 1: Usando o script run.py (Recomendado)
+```bash
+# Terminal 1 - Na raiz do projeto
+python run.py
+```
+Este script irá iniciar o backend FastAPI em http://localhost:8000
+
+```bash
+# Terminal 2 - Inicie o frontend
+cd frontend
+npm run dev    # OU: bun run dev
+```
+
+#### Opção 2: Executar manualmente
+
+```bash
+# Terminal 1 - Backend
+python -m uvicorn app.main:app --reload --port 8000
+
+# Terminal 2 - Frontend
+cd frontend
+npm run dev    # OU: bun run dev
+```
+
+### 🌐 Acessar a Aplicação
+
+- **Frontend**: http://localhost:5173
+- **Backend API**: http://localhost:8000
+- **Documentação Swagger**: http://localhost:8000/docs
+- **Documentação ReDoc**: http://localhost:8000/redoc
 
 ## 📚 Recursos
 
@@ -131,15 +153,15 @@ Todos os recursos têm CRUD completo e busca por nome.
 
 #### Páginas:
 1. **Characters** (`/`) - Gerenciar personagens
-2. **Spells** (`/spells`) - Gerenciar magias
+2. **Spells** (`/spells`) - Gerenciar magias e habilidades
 3. **Equipment** (`/equipments`) - Gerenciar equipamentos
 
 #### Funcionalidades:
-- ✨ Criar itens personalizados
-- ✏️ Editar itens existentes
-- 🗑️ Deletar itens
+- ✨ Criar personagens personalizados
+- ✏️ Editar personagens existentes
+- 🗑️ Deletar personagens
 - 🔍 Buscar e filtrar
-- 💾 Persistência local (localStorage)
+- 📊 Visualização de estatísticas
 - 🎨 UI temática RPG
 
 #### Tecnologias Frontend:
@@ -149,16 +171,12 @@ Todos os recursos têm CRUD completo e busca por nome.
 - 🎨 TailwindCSS
 - 🎭 Shadcn/ui
 - 🔄 React Router
-- 📡 TanStack Query
-
-## 🎨 Screenshots
-
-> *Em breve*
+- 🎨 Lucide React (ícones)
 
 ## 🗂️ Banco de Dados
 
 ### Tabelas:
-- **Personagens** - Heróis e aventureiros
+- **Personagens** - Heróis e aventureiros (22 colunas)
 - **Raças** - Humano, Elfo, Anão, etc.
 - **Classes** - Guerreiro, Mago, Clérigo, etc.
 - **Magias** - Feitiços e habilidades mágicas
@@ -167,53 +185,13 @@ Todos os recursos têm CRUD completo e busca por nome.
 - **Atributos** - Stats dos personagens
 
 ### Relacionamentos:
-- Personagem → Raça (1:N)
-- Personagem → Classe (1:N)
-- Personagem → Equipamento (1:N)
-- Personagem → Atributos (1:N)
-- Classe → Magias (N:1)
-- Classe → Habilidades (N:1)
+- Personagem → Raça (N:1)
+- Personagem → Classe (N:1)
+- Personagem → Magias (N:N)
+- Personagem → Habilidades (N:N)
+- Personagem → Equipamentos (N:N)
 
-## 📖 Documentação
-
-- [Backend README](app/README.md) - Detalhes do backend
-- [Migration Guide](MIGRATION_GUIDE.md) - Guia de migração
-- [API Docs](http://localhost:8000/docs) - Documentação interativa
-
-## 🤝 Contribuindo
-
-Contribuições são bem-vindas! Sinta-se à vontade para:
-
-1. Fork o projeto
-2. Criar uma branch (`git checkout -b feature/NovaFuncionalidade`)
-3. Commit suas mudanças (`git commit -m 'Adiciona nova funcionalidade'`)
-4. Push para a branch (`git push origin feature/NovaFuncionalidade`)
-5. Abrir um Pull Request
-
-## �️ Stack Tecnológica
-
-### Backend
-```
-FastAPI 0.104+       # Framework web assíncrono
-SQLAlchemy 2.0+      # ORM para banco de dados
-Pydantic 2.0+        # Validação de dados
-Uvicorn              # Servidor ASGI
-SQLite               # Banco de dados relacional
-```
-
-### Frontend
-```
-React 18.3+          # Biblioteca UI
-TypeScript 5.5+      # Superset JavaScript tipado
-Vite 5.4+            # Build tool e dev server
-TailwindCSS 3.4+     # Framework CSS utility-first
-Shadcn/ui            # Componentes UI reutilizáveis
-Lucide React         # Ícones SVG
-React Router 6+      # Roteamento
-TanStack Query       # Gerenciamento de estado servidor
-```
-
-## 📊 Estatísticas do Personagem
+##  Estatísticas do Personagem
 
 O sistema implementa **12 atributos** completos para cada personagem:
 
@@ -279,55 +257,23 @@ Baseado no sistema de alinhamento de D&D:
 | Neutro Mal | Egoísta e cruel |
 | Caótico Mal | Destrutivo e sádico |
 
-## 🎯 Roadmap Futuro
+## 📖 Documentação da API
 
-- [ ] Sistema de combate
-- [ ] Rolagem de dados (d20, d6, etc.)
-- [ ] Gestão de campanhas
-- [ ] Múltiplos jogadores/mestres
-- [ ] Exportação de fichas em PDF
-- [ ] Sistema de inventário expandido
-- [ ] Cálculo automático de bônus por raça/classe
-- [ ] Sistema de progressão e experiência
-- [ ] Árvore de habilidades
-- [ ] Modo escuro/claro
-- [ ] Temas customizáveis
+Após iniciar o servidor backend, acesse a documentação interativa:
+- **Swagger UI**: http://localhost:8000/docs
+- **ReDoc**: http://localhost:8000/redoc
 
 ## 📝 Licença
 
 Este projeto está sob a licença MIT. Veja o arquivo [LICENSE](LICENSE) para mais detalhes.
 
-## � Desenvolvedores
+## 🙏 Agradecimentos
 
-<table>
-  <tr>
-    <td align="center">
-      <a href="https://github.com/edumanzur">
-        <img src="https://github.com/edumanzur.png" width="100px;" alt="Eduardo Manzur"/><br />
-        <sub><b>Eduardo Manzur</b></sub>
-      </a><br />
-      <sub>💻 Desenvolvedor Full-Stack</sub>
-    </td>
-    <td align="center">
-      <a href="https://github.com/guilherme">
-        <img src="https://github.com/guilherme.png" width="100px;" alt="Guilherme"/><br />
-        <sub><b>Guilherme</b></sub>
-      </a><br />
-      <sub>💻 Desenvolvedor Full-Stack</sub>
-    </td>
-  </tr>
-</table>
+Desenvolvido com 💜 por:
+- **[Eduardo Manzur](https://github.com/edumanzur)** - [@edumanzur](https://github.com/edumanzur)
+- **[Guilherme Viera](https://github.com/GUILHERME-LA)** - [@GUILHERME-LA](https://github.com/GUILHERME-LA)
 
-### 🙏 Agradecimentos
-
-Desenvolvido com 💜 por **Eduardo Manzur** e **Guilherme**
-
-Este projeto foi criado como parte de um trabalho acadêmico/estudo de desenvolvimento full-stack, demonstrando a integração completa entre:
-- Backend robusto com FastAPI e SQLAlchemy
-- Frontend moderno com React e TypeScript
-- Banco de dados relacional com SQLite
-- Design system componentizado com Shadcn/ui
-- Arquitetura RESTful escalável
+Este projeto foi criado como parte de um trabalho acadêmico de desenvolvimento full-stack, demonstrando a integração completa entre backend FastAPI, frontend React/TypeScript e banco de dados SQLite.
 
 ---
 
@@ -339,21 +285,3 @@ Este projeto foi criado como parte de um trabalho acadêmico/estudo de desenvolv
 [![License](https://img.shields.io/badge/License-MIT-yellow.svg?style=for-the-badge)](LICENSE)
 
 </div>
-- GitHub: [@edumanzur](https://github.com/edumanzur)
-
-## 🙏 Agradecimentos
-
-- FastAPI pela documentação excelente
-- Shadcn/ui pelos componentes lindos
-- Comunidade React por todo suporte
-
-## 📞 Suporte
-
-Se você tiver problemas ou dúvidas:
-1. Verifique a [documentação](http://localhost:8000/docs)
-2. Leia o [Migration Guide](MIGRATION_GUIDE.md)
-3. Abra uma issue no GitHub
-
----
-
-⭐ Se você gostou deste projeto, considere dar uma estrela!
