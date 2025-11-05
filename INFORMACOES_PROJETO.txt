@@ -1,0 +1,186 @@
+================================================================================
+                            RPG SYSTEM
+        Sistema de Gerenciamento de Personagens de RPG
+================================================================================
+
+NOME DA APLICACAO:
+------------------
+RPG System - Sistema CRUD Full-Stack para Gerenciamento de Personagens de RPG
+
+
+DESCRICAO DAS FUNCIONALIDADES:
+-------------------------------
+
+1. GERENCIAMENTO DE PERSONAGENS
+   - Criar novos personagens com 12 atributos diferentes
+   - Editar personagens existentes
+   - Deletar personagens
+   - Visualizar lista completa de personagens
+
+2. SISTEMA DE ATRIBUTOS (12 STATUS)
+   - Vida: Pontos de vida do personagem (padrao: 100)
+   - Forca: Poder fisico e dano corpo a corpo (padrao: 10)
+   - Destreza: Agilidade e precisao (padrao: 10)
+   - Constituicao: Resistencia e durabilidade (padrao: 10)
+   - Inteligencia: Capacidade mental e magica (padrao: 10)
+   - Sabedoria: Percepcao e intuicao (padrao: 10)
+   - Mana: Energia magica (padrao: 100)
+   - Carisma: Influencia social (padrao: 10)
+   - Sorte: Chance de eventos favoraveis (padrao: 10)
+   - Reputacao: Fama e renome (padrao: 0)
+   - CA (Classe de Armadura): Defesa do personagem (padrao: 10)
+   - Deslocamento: Velocidade de movimento (padrao: 30)
+
+3. SISTEMA DE CLASSES (12 OPCOES)
+   - Guerreiro, Mago, Ladino, Ranger, Feiticeiro, Druida
+   - Clerigo, Bardo, Paladino, Monge, Barbaro, Bruxo
+   - Selecao via dropdown (lista suspensa)
+
+4. SISTEMA DE RACAS (9 OPCOES)
+   - Humano, Elfo, Anao, Halfling, Draconato
+   - Gnomo, Meio-Elfo, Meio-Orc, Tiferino
+   - Selecao via dropdown (lista suspensa)
+
+5. SISTEMA DE TENDENCIAS (9 ALINHAMENTOS)
+   - Baseado no sistema de D&D
+   - Leal Bom, Neutro Bom, Caotico Bom
+   - Leal Neutro, Neutro, Caotico Neutro
+   - Leal Mal, Neutro Mal, Caotico Mal
+   - Selecao via dropdown (lista suspensa)
+
+6. SISTEMA DE MAGIAS E HABILIDADES
+   - Adicionar magias aos personagens
+   - Adicionar habilidades especiais
+   - Gerenciar lista de magias/habilidades
+
+7. SISTEMA DE EQUIPAMENTOS
+   - Adicionar armas ao personagem
+   - Adicionar armaduras ao personagem
+   - Adicionar acessorios ao personagem
+   - Gerenciar inventario completo
+
+8. INTERFACE TEMATICA RPG
+   - Design inspirado em jogos classicos de RPG
+   - Fontes medievais (Cinzel, Crimson Text)
+   - Icones tematicos para cada atributo
+   - Interface intuitiva e responsiva
+
+
+COMO EXECUTAR O PROJETO:
+-------------------------
+
+REQUISITOS:
+-----------
+- Python 3.9 ou superior
+- Node.js 18 ou superior (ou Bun)
+- Git
+
+
+PASSO A PASSO:
+--------------
+
+1. BAIXAR O PROJETO
+   
+   Abra o terminal (Prompt de Comando ou PowerShell) e execute:
+   
+   git clone https://github.com/edumanzur/CRUD-Python.git
+   cd CRUD-Python
+
+
+2. INSTALAR DEPENDENCIAS DO BACKEND
+   
+   No mesmo terminal, execute:
+   
+   pip install -r requirements.txt
+
+
+3. INSTALAR DEPENDENCIAS DO FRONTEND
+   
+   Execute os comandos:
+   
+   cd frontend
+   npm install
+   
+   OU se tiver o Bun instalado (mais rapido):
+   
+   bun install
+
+
+4. EXECUTAR O BACKEND
+   
+   Abra um terminal na pasta raiz do projeto e execute:
+   
+   python run.py
+   
+   OU manualmente:
+   
+   python -m uvicorn app.main:app --reload --port 8000
+   
+   O backend estara rodando em: http://localhost:8000
+
+
+5. EXECUTAR O FRONTEND
+   
+   Abra OUTRO terminal, va ate a pasta frontend e execute:
+   
+   cd frontend
+   npm run dev
+   
+   OU com Bun:
+   
+   bun run dev
+   
+   O frontend estara rodando em: http://localhost:5173
+
+
+6. ACESSAR A APLICACAO
+   
+   Abra seu navegador e acesse:
+   
+   - Aplicacao Principal: http://localhost:5173
+   - Documentacao da API: http://localhost:8000/docs
+   - API ReDoc: http://localhost:8000/redoc
+
+
+OBSERVACOES IMPORTANTES:
+------------------------
+
+- Mantenha os dois terminais abertos (backend e frontend)
+- O backend deve estar rodando antes de usar o frontend
+- O banco de dados SQLite sera criado automaticamente
+- Todas as alteracoes sao salvas automaticamente no banco
+
+
+TECNOLOGIAS UTILIZADAS:
+-----------------------
+
+Backend:
+- FastAPI (framework web)
+- SQLAlchemy (ORM)
+- Pydantic (validacao de dados)
+- SQLite (banco de dados)
+- Uvicorn (servidor)
+
+Frontend:
+- React 18
+- TypeScript
+- Vite (build tool)
+- TailwindCSS (estilizacao)
+- Shadcn/ui (componentes)
+- Lucide React (icones)
+
+
+DESENVOLVEDORES:
+----------------
+- Eduardo Manzur (https://github.com/edumanzur)
+- Guilherme Viera (https://github.com/GUILHERME-LA)
+
+
+LICENCA:
+--------
+MIT License - 2025
+
+
+================================================================================
+                    Que suas aventuras sejam epicas!
+================================================================================
