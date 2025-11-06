@@ -68,6 +68,11 @@ export const CharacterEditor = ({ character, onSave, onDelete, disabled = false 
   // Sincronizar estado interno quando o personagem selecionado mudar
   useEffect(() => {
     setEditedCharacter(character);
+    console.log('🎯 CharacterEditor - Personagem carregado:', {
+      id: character.id,
+      name: character.name,
+      class: character.class,
+    });
   }, [character]);
 
   // Calcular modificador: quando status é 0, mod é -5; a cada 2 pontos, mod aumenta em 1

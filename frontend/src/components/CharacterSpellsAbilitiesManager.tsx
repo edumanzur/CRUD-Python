@@ -21,12 +21,24 @@ export const CharacterSpellsAbilitiesManager = ({ characterId, characterClass }:
   const [showAddAbility, setShowAddAbility] = useState(false);
   const [loading, setLoading] = useState(false);
 
+  // Log inicial
+  console.log('🎯 CharacterSpellsAbilitiesManager montado:', {
+    characterId,
+    characterClass,
+  });
+
   useEffect(() => {
+    console.log('🔄 useEffect disparado - characterId:', characterId);
     loadData();
   }, [characterId]);
 
   const loadData = async () => {
-    if (characterId.startsWith('temp-')) return;
+    console.log('⚡ loadData() chamado - characterId:', characterId);
+    
+    if (characterId.startsWith('temp-')) {
+      console.log('⏭️  Pulando loadData() - ID temporário');
+      return;
+    }
     
     try {
       setLoading(true);
@@ -114,15 +126,27 @@ export const CharacterSpellsAbilitiesManager = ({ characterId, characterClass }:
     // Filtrar magias já adicionadas
     if (characterSpells.some(cs => cs.Id === spell.Id)) return false;
     
+    // Debug: Log da filtragem
+    console.log(`🔍 Verificando magia "${spell.Nome}":`);
+    console.log(`   - Classes da magia: "${spell.Classes}"`);
+    console.log(`   - Classe do personagem: "${characterClass}"`);
+    
     // Filtrar por classe: se a magia tem classes definidas, verificar se a classe do personagem está incluída
-    // Se Classes estiver vazio/null, a magia está disponível para todas as classes
-    if (spell.Classes) {
+    // Se Classes estiver vazio/null/None, a magia está disponível para todas as classes
+    if (spell.Classes && spell.Classes !== 'None' && spell.Classes.trim() !== '') {
       const spellClasses = spell.Classes.split(',').map(c => c.trim());
+      console.log(`   - Classes parseadas:`, spellClasses);
+      console.log(`   - Incluiu "${characterClass}"?`, spellClasses.includes(characterClass));
+      
       if (spellClasses.length > 0 && !spellClasses.includes(characterClass)) {
+        console.log(`   ❌ Magia REJEITADA (classe incompatível)`);
         return false;
       }
+    } else {
+      console.log(`   ℹ️  Sem restrição de classe (disponível para todos)`);
     }
     
+    console.log(`   ✅ Magia APROVADA`);
     return true;
   });
 
@@ -130,19 +154,32 @@ export const CharacterSpellsAbilitiesManager = ({ characterId, characterClass }:
     // Filtrar habilidades já adicionadas
     if (characterAbilities.some(ca => ca.Id === ability.Id)) return false;
     
+    // Debug: Log da filtragem
+    console.log(`🔍 Verificando habilidade "${ability.Nome}":`);
+    console.log(`   - Classes da habilidade: "${ability.Classes}"`);
+    console.log(`   - Classe do personagem: "${characterClass}"`);
+    
     // Filtrar por classe: se a habilidade tem classes definidas, verificar se a classe do personagem está incluída
-    // Se Classes estiver vazio/null, a habilidade está disponível para todas as classes
-    if (ability.Classes) {
+    // Se Classes estiver vazio/null/None, a habilidade está disponível para todas as classes
+    if (ability.Classes && ability.Classes !== 'None' && ability.Classes.trim() !== '') {
       const abilityClasses = ability.Classes.split(',').map(c => c.trim());
+      console.log(`   - Classes parseadas:`, abilityClasses);
+      console.log(`   - Incluiu "${characterClass}"?`, abilityClasses.includes(characterClass));
+      
       if (abilityClasses.length > 0 && !abilityClasses.includes(characterClass)) {
+        console.log(`   ❌ Habilidade REJEITADA (classe incompatível)`);
         return false;
       }
+    } else {
+      console.log(`   ℹ️  Sem restrição de classe (disponível para todos)`);
     }
     
+    console.log(`   ✅ Habilidade APROVADA`);
     return true;
   });
 
   console.log('📋 Listas calculadas:', {
+    characterClass: characterClass,
     totalSpells: allSpells.length,
     characterSpells: characterSpells.length,
     availableSpells: availableSpells.length,
@@ -166,7 +203,16 @@ export const CharacterSpellsAbilitiesManager = ({ characterId, characterClass }:
         <div className="flex items-center justify-between">
           <h3 className="font-heading font-bold text-lg text-primary">Magias</h3>
           <Button
-            onClick={() => setShowAddSpell(true)}
+            onClick={() => {
+              console.log('🔷 Botão "Adicionar Magia" clicado');
+              console.log('📊 Estado atual:', {
+                allSpells: allSpells.length,
+                characterSpells: characterSpells.length,
+                availableSpells: availableSpells.length,
+                characterClass,
+              });
+              setShowAddSpell(true);
+            }}
             className="rpg-button"
             size="sm"
             disabled={loading}
@@ -256,6 +302,12 @@ export const CharacterSpellsAbilitiesManager = ({ characterId, characterClass }:
             </DialogTitle>
           </DialogHeader>
           <div className="space-y-2">
+            {(() => {
+              console.log('🎨 Renderizando Dialog de Magias');
+              console.log('📊 availableSpells.length:', availableSpells.length);
+              console.log('📋 availableSpells:', availableSpells);
+              return null;
+            })()}
             {availableSpells.length === 0 ? (
               <p className="text-muted-foreground">Todas as magias já foram adicionadas</p>
             ) : (

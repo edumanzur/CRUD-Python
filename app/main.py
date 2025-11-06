@@ -211,7 +211,6 @@ class MagiaSchema(BaseModel):
     Dano: Optional[str] = None  # Dano no formato XdY (ex: 2d6, 1d8+2)
     Classes: Optional[str] = None  # Classes que podem usar (separadas por vírgula)
     Campanha_id: Optional[int] = None  # Campanha à qual pertence
-    Classes: Optional[str] = None  # Classes que podem usar (separadas por vírgula)
     model_config = {"from_attributes": True}
 
 

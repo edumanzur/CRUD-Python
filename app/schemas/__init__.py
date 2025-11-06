@@ -12,6 +12,9 @@ class MagiaSchema(BaseModel):
     CustoMana: Optional[int] = None
     Cooldown: Optional[int] = None
     Efeito: Optional[str] = None
+    Dano: Optional[str] = None  # Formato XdY (ex: 2d6, 1d8+2)
+    Classes: Optional[str] = None  # Classes que podem usar (separadas por vírgula)
+    Campanha_id: Optional[int] = None  # Campanha à qual pertence
     
     model_config = {"from_attributes": True}
 
@@ -48,7 +51,9 @@ class HabilidadeSchema(BaseModel):
     Cooldown: Optional[int] = None
     Icone: Optional[str] = None
     Efeito: Optional[str] = None
-    Dano: Optional[int] = None
+    Dano: Optional[str] = None  # Formato XdY (ex: 1d6, 2d8, 3d6)
+    Classes: Optional[str] = None  # Classes que podem usar (separadas por vírgula)
+    Campanha_id: Optional[int] = None  # Campanha à qual pertence
     
     model_config = {"from_attributes": True}
 
