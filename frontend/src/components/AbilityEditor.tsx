@@ -6,6 +6,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Checkbox } from "@/components/ui/checkbox";
 import { Save, Trash2, Zap } from "lucide-react";
 import {
   AlertDialog,
@@ -18,6 +19,22 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
+
+// Classes disponíveis
+const AVAILABLE_CLASSES = [
+  "Guerreiro",
+  "Mago",
+  "Ladino",
+  "Ranger",
+  "Feiticeiro",
+  "Druida",
+  "Clérigo",
+  "Bardo",
+  "Paladino",
+  "Monge",
+  "Bárbaro",
+  "Bruxo",
+] as const;
 
 interface AbilityEditorProps {
   ability: Ability;
@@ -32,6 +49,16 @@ export function AbilityEditor({ ability, onSave, onDelete, disabled = false }: A
   useEffect(() => {
     setEditedAbility(ability);
   }, [ability]);
+
+  const handleClassToggle = (className: string) => {
+    setEditedAbility((prev) => {
+      const currentClasses = prev.classes || [];
+      const newClasses = currentClasses.includes(className)
+        ? currentClasses.filter((c) => c !== className)
+        : [...currentClasses, className];
+      return { ...prev, classes: newClasses };
+    });
+  };
 
   const handleSave = () => {
     onSave(editedAbility);
@@ -113,18 +140,57 @@ export function AbilityEditor({ ability, onSave, onDelete, disabled = false }: A
 
           <div className="space-y-2">
             <Label htmlFor="damage" className="font-heading font-semibold">
-              Damage
+              Dice
             </Label>
-            <Input
-              id="damage"
-              type="number"
-              value={editedAbility.damage || 0}
-              onChange={(e) =>
-                setEditedAbility({ ...editedAbility, damage: parseInt(e.target.value) || 0 })
-              }
-              className="font-body"
-              min="0"
-            />
+            <div className="flex gap-2 items-center">
+              <div className="flex-1">
+                <Input
+                  type="number"
+                  min="1"
+                  placeholder="Nº dados"
+                  value={editedAbility.damage?.split('d')[0] || ''}
+                  onChange={(e) => {
+                    const numDice = e.target.value;
+                    const diceType = editedAbility.damage?.split('d')[1] || '6';
+                    setEditedAbility({ 
+                      ...editedAbility, 
+                      damage: numDice && diceType ? `${numDice}d${diceType}` : '' 
+                    });
+                  }}
+                  className="font-body"
+                />
+              </div>
+              <span className="text-2xl font-bold">d</span>
+              <div className="flex-1">
+                <Select
+                  value={editedAbility.damage?.split('d')[1] || '6'}
+                  onValueChange={(value) => {
+                    const numDice = editedAbility.damage?.split('d')[0] || '1';
+                    setEditedAbility({ 
+                      ...editedAbility, 
+                      damage: `${numDice}d${value}` 
+                    });
+                  }}
+                >
+                  <SelectTrigger className="font-body">
+                    <SelectValue placeholder="Tipo" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="2">d2</SelectItem>
+                    <SelectItem value="4">d4</SelectItem>
+                    <SelectItem value="6">d6</SelectItem>
+                    <SelectItem value="8">d8</SelectItem>
+                    <SelectItem value="10">d10</SelectItem>
+                    <SelectItem value="12">d12</SelectItem>
+                    <SelectItem value="20">d20</SelectItem>
+                    <SelectItem value="100">d100</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+            <p className="text-xs text-muted-foreground mt-1">
+              Ex: 2d6 = 2 dados de 6 lados
+            </p>
           </div>
         </div>
 
@@ -153,6 +219,30 @@ export function AbilityEditor({ ability, onSave, onDelete, disabled = false }: A
             className="font-body min-h-[80px]"
             placeholder="Detailed effect description..."
           />
+        </div>
+
+        {/* Seleção de Classes */}
+        <div>
+          <Label className="font-heading font-semibold mb-3 block">
+            Classes que podem usar esta habilidade
+          </Label>
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
+            {AVAILABLE_CLASSES.map((className) => (
+              <div key={className} className="flex items-center space-x-2">
+                <Checkbox
+                  id={`ability-class-${className}`}
+                  checked={editedAbility.classes?.includes(className) || false}
+                  onCheckedChange={() => handleClassToggle(className)}
+                />
+                <label
+                  htmlFor={`ability-class-${className}`}
+                  className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 cursor-pointer"
+                >
+                  {className}
+                </label>
+              </div>
+            ))}
+          </div>
         </div>
 
         <div className="flex space-x-3 pt-4">

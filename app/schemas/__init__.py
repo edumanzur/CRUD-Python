@@ -114,6 +114,7 @@ class EquipamentoSchema(BaseModel):
     Defesa: Optional[int] = None
     Bonus: Optional[int] = None
     Peso: Optional[int] = None
+    Dano: Optional[str] = None  # Formato: XdY (ex: 2d4, 1d8, 3d6)
     
     model_config = {"from_attributes": True}
 

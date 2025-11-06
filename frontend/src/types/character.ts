@@ -4,6 +4,8 @@ export interface Character {
   class: string;
   race?: string;  // Raça do personagem
   level: number;
+  type?: string;  // Tipo: Jogador, NPC, ou Monstro
+  imagemPath?: string;  // Caminho da imagem do personagem
   stats: {
     vida: number;
     forca: number;

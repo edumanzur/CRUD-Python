@@ -2,7 +2,7 @@ import { Equipment } from "@/types/equipment";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Edit, Sword, Shield, Sparkles, Package, Wrench } from "lucide-react";
+import { Edit, Sword, Shield, Sparkles, Package, Wrench, Award } from "lucide-react";
 
 interface EquipmentCardProps {
   equipment: Equipment;
@@ -82,18 +82,24 @@ export const EquipmentCard = ({ equipment, onClick, onEdit }: EquipmentCardProps
 
         <p className="text-sm text-foreground/80 leading-relaxed">{equipment.description}</p>
 
-        {(equipment.attack || equipment.defense || equipment.bonus) && (
+        {(equipment.damage || equipment.defense || equipment.proficiency || equipment.bonus) && (
           <div className="flex flex-wrap gap-2 pt-2 border-t border-border/50">
-            {equipment.attack !== undefined && equipment.attack > 0 && (
+            {equipment.damage && (
               <div className="flex items-center space-x-1 text-xs">
                 <Sword className="h-3 w-3 text-destructive" />
-                <span className="font-semibold text-destructive">+{equipment.attack}</span>
+                <span className="font-semibold text-destructive">{equipment.damage}</span>
               </div>
             )}
             {equipment.defense !== undefined && equipment.defense > 0 && (
               <div className="flex items-center space-x-1 text-xs">
                 <Shield className="h-3 w-3 text-primary" />
                 <span className="font-semibold text-primary">+{equipment.defense}</span>
+              </div>
+            )}
+            {equipment.proficiency && (
+              <div className="flex items-center space-x-1 text-xs">
+                <Award className="h-3 w-3 text-amber-500" />
+                <span className="font-semibold text-amber-500">{equipment.proficiency}</span>
               </div>
             )}
             {equipment.bonus && (

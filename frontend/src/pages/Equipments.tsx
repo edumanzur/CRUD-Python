@@ -8,12 +8,22 @@ import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Badge } from "@/components/ui/badge";
-import { Search, Filter, Package, Plus, Sword, Shield, Sparkles, RefreshCw } from "lucide-react";
+import { Search, Filter, Package, Plus, Sword, Shield, Sparkles, RefreshCw, Award } from "lucide-react";
 import { toast } from "sonner";
+import { useCampaign } from "@/contexts/CampaignContext";
 import rpgBanner from "@/assets/rpg-banner.png";
 import api, { Equipment as ApiEquipment } from "@/services/api";
 
 const STORAGE_KEY = "rpg-custom-equipments";
+
+// Mapeamento de emojis por tipo de equipamento
+const typeToEmoji: Record<string, string> = {
+  weapon: "⚔️",
+  armor: "🛡️",
+  accessory: "💍",
+  consumable: "🧪",
+  tool: "🔧",
+};
 
 const createNewEquipment = (): Equipment => ({
   id: `temp-${Date.now()}`,
@@ -22,27 +32,32 @@ const createNewEquipment = (): Equipment => ({
   type: "weapon",
   rarity: "common",
   icon: "⚔️",
-  attack: 0,
   defense: 0,
   bonus: "",
   weight: 1,
+  damage: "1d6",  // Dano padrão
   isCustom: true,
 });
 
 // Converter API → Frontend
-const fromApiEquipment = (apiEquip: ApiEquipment): Equipment => ({
-  id: apiEquip.Id.toString(),
-  name: apiEquip.Nome,
-  description: apiEquip.Descricao || "",
-  type: (apiEquip.Tipo as any) || "weapon",
-  rarity: (apiEquip.Raridade as any) || "common",
-  icon: apiEquip.Icone || "⚔️",
-  attack: apiEquip.Ataque || 0,
-  defense: apiEquip.Defesa || 0,
-  bonus: apiEquip.Descricao || "",
-  weight: apiEquip.Peso || 1,
-  isCustom: true,
-});
+const fromApiEquipment = (apiEquip: ApiEquipment): Equipment => {
+  const equipType = (apiEquip.Tipo as any) || "weapon";
+  return {
+    id: apiEquip.Id.toString(),
+    name: apiEquip.Nome,
+    description: apiEquip.Descricao || "",
+    type: equipType,
+    rarity: (apiEquip.Raridade as any) || "common",
+    icon: typeToEmoji[equipType] || apiEquip.Icone || "⚔️",  // Usa emoji baseado no tipo
+    attack: apiEquip.Ataque || 0,
+    defense: apiEquip.Defesa || 0,
+    bonus: apiEquip.Descricao || "",
+    weight: apiEquip.Peso || 1,
+    damage: apiEquip.Dano || "",  // Campo de dano
+    proficiency: apiEquip.Proficiencia || "",  // Campo de proficiência
+    isCustom: true,
+  };
+};
 
 // Converter Frontend → API
 const toApiEquipment = (equip: Equipment): Omit<ApiEquipment, 'Id'> => ({
@@ -51,13 +66,16 @@ const toApiEquipment = (equip: Equipment): Omit<ApiEquipment, 'Id'> => ({
   Tipo: equip.type,
   Raridade: equip.rarity,
   Icone: equip.icon,
-  Ataque: equip.attack,
+  Ataque: 0,  // Não usado mais
   Defesa: equip.defense,
-  Bonus: equip.attack || equip.defense || 0,
+  Bonus: equip.defense || 0,
   Peso: equip.weight,
+  Dano: equip.damage || "",  // Campo de dano
+  Proficiencia: equip.proficiency || "",  // Campo de proficiência
 });
 
 export default function Equipments() {
+  const { activeCampaign } = useCampaign(); // Hook para obter campanha ativa
   const [searchTerm, setSearchTerm] = useState("");
   const [typeFilter, setTypeFilter] = useState<string>("all");
   const [rarityFilter, setRarityFilter] = useState<string>("all");
@@ -68,11 +86,19 @@ export default function Equipments() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
 
-  // Carregar equipamentos do backend
+  // Carregar equipamentos do backend filtrados por campanha
   const loadEquipments = async () => {
     try {
       setLoading(true);
-      const apiEquipments = await api.equipments.getAll();
+      // Adicionar filtro de campanha na URL se houver campanha ativa
+      const url = activeCampaign 
+        ? `http://localhost:8000/equipamentos/?campanha_id=${activeCampaign.Id}`
+        : 'http://localhost:8000/equipamentos/';
+      
+      const response = await fetch(url);
+      if (!response.ok) throw new Error('Erro ao carregar equipamentos');
+      
+      const apiEquipments = await response.json();
       const converted = apiEquipments.map(fromApiEquipment);
       setCustomEquipments(converted);
       localStorage.setItem(STORAGE_KEY, JSON.stringify(converted));
@@ -90,9 +116,12 @@ export default function Equipments() {
     }
   };
 
+  // Recarregar quando a campanha ativa mudar
   useEffect(() => {
-    loadEquipments();
-  }, []);
+    if (activeCampaign) {
+      loadEquipments();
+    }
+  }, [activeCampaign]);
 
   const saveCustomEquipments = (newEquipments: Equipment[]) => {
     setCustomEquipments(newEquipments);
@@ -132,7 +161,13 @@ export default function Equipments() {
       const isNewEquipment = equipment.id.startsWith('temp-');
       
       if (isNewEquipment) {
-        const apiEquip = await api.equipments.create(toApiEquipment(equipment));
+        const apiData = toApiEquipment(equipment);
+        // Adicionar Campanha_id se houver campanha ativa
+        const apiEquipWithCampaign = activeCampaign 
+          ? { ...apiData, Campanha_id: activeCampaign.Id }
+          : apiData;
+        
+        const apiEquip = await api.equipments.create(apiEquipWithCampaign);
         const converted = fromApiEquipment(apiEquip);
         
         const updated = customEquipments.map((e) =>
@@ -146,10 +181,13 @@ export default function Equipments() {
         toast.success("Equipment created successfully!");
       } else {
         const id = parseInt(equipment.id);
-        const apiEquip = await api.equipments.update(id, {
-          Id: id,
-          ...toApiEquipment(equipment),
-        });
+        const apiData = toApiEquipment(equipment);
+        // Manter Campanha_id ao atualizar
+        const apiEquipWithCampaign = activeCampaign 
+          ? { Id: id, ...apiData, Campanha_id: activeCampaign.Id }
+          : { Id: id, ...apiData };
+        
+        const apiEquip = await api.equipments.update(id, apiEquipWithCampaign);
         const converted = fromApiEquipment(apiEquip);
         
         const updated = customEquipments.map((e) => (e.id === equipment.id ? converted : e));
@@ -405,13 +443,13 @@ export default function Equipments() {
                 </div>
 
                 <div className="grid grid-cols-2 gap-4">
-                  {selectedEquipment.attack !== undefined && selectedEquipment.attack > 0 && (
+                  {selectedEquipment.damage && (
                     <div className="rpg-card bg-accent/20">
                       <div className="flex items-center space-x-2 mb-2">
                         <Sword className="h-5 w-5 text-destructive" />
-                        <h4 className="font-heading font-semibold">Attack</h4>
+                        <h4 className="font-heading font-semibold">Damage</h4>
                       </div>
-                      <p className="text-sm text-destructive font-bold">+{selectedEquipment.attack}</p>
+                      <p className="text-sm text-destructive font-bold">{selectedEquipment.damage}</p>
                     </div>
                   )}
 
@@ -432,6 +470,16 @@ export default function Equipments() {
                         <h4 className="font-heading font-semibold">Weight</h4>
                       </div>
                       <p className="text-sm">{selectedEquipment.weight} kg</p>
+                    </div>
+                  )}
+
+                  {selectedEquipment.proficiency && (
+                    <div className="rpg-card bg-accent/20">
+                      <div className="flex items-center space-x-2 mb-2">
+                        <Award className="h-5 w-5 text-amber-500" />
+                        <h4 className="font-heading font-semibold">Proficiência</h4>
+                      </div>
+                      <p className="text-sm text-amber-500 font-bold">{selectedEquipment.proficiency}</p>
                     </div>
                   )}
                 </div>

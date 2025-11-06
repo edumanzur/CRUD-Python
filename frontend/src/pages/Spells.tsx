@@ -12,8 +12,9 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Search, Filter, Sparkles, Target, Zap, Plus, RefreshCw, Swords } from "lucide-react";
+import { Search, Filter, Sparkles, Target, Zap, Plus, RefreshCw, Swords, Users, Dices, Clock } from "lucide-react";
 import { toast } from "sonner";
+import { useCampaign } from "@/contexts/CampaignContext";
 import rpgBanner from "@/assets/rpg-banner.png";
 import api, { Spell as ApiSpell, Ability as ApiAbility } from "@/services/api";
 
@@ -30,6 +31,8 @@ const createNewSpell = (): Spell => ({
   manaCost: 10,
   cooldown: 0,
   effect: "Describe the effect here",
+  damage: "", // Dano no formato XdY (ex: 2d6)
+  classes: [], // Nenhuma classe selecionada inicialmente
   isCustom: true,
 });
 
@@ -41,7 +44,8 @@ const createNewAbility = (): Ability => ({
   cooldown: 0,
   icon: "⚡",
   effect: "Describe the effect here",
-  damage: 0,
+  damage: "", // Dano no formato XdY (ex: 2d6)
+  classes: [], // Nenhuma classe selecionada inicialmente
 });
 
 // Converter do formato da API para o formato do frontend
@@ -55,6 +59,8 @@ const fromApiSpell = (apiSpell: ApiSpell): Spell => ({
   manaCost: apiSpell.CustoMana || 10,
   cooldown: apiSpell.Cooldown || 0,
   effect: apiSpell.Efeito || apiSpell.Descricao,
+  damage: apiSpell.Dano || "", // Dano no formato XdY
+  classes: apiSpell.Classes ? apiSpell.Classes.split(',').map(c => c.trim()) : [], // Converte string para array
   isCustom: true, // Marcar como custom para permitir edição
 });
 
@@ -68,6 +74,8 @@ const toApiSpell = (spell: Spell): Omit<ApiSpell, 'Id'> => ({
   CustoMana: spell.manaCost,
   Cooldown: spell.cooldown,
   Efeito: spell.effect,
+  Dano: spell.damage || undefined, // Dano no formato XdY
+  Classes: spell.classes && spell.classes.length > 0 ? spell.classes.join(',') : undefined, // Converte array para string
 });
 
 // Converter do formato da API para o formato do frontend (Abilities)
@@ -79,7 +87,8 @@ const fromApiAbility = (apiAbility: ApiAbility): Ability => ({
   cooldown: apiAbility.Cooldown || 0,
   icon: apiAbility.Icone || "⚡",
   effect: apiAbility.Efeito || apiAbility.Descricao,
-  damage: apiAbility.Dano || 0,
+  damage: apiAbility.Dano || "", // Dano no formato XdY
+  classes: apiAbility.Classes ? apiAbility.Classes.split(',').map(c => c.trim()) : [], // Converte string para array
 });
 
 // Converter do formato do frontend para o formato da API (Abilities)
@@ -90,14 +99,33 @@ const toApiAbility = (ability: Ability): Omit<ApiAbility, 'Id'> => ({
   Cooldown: ability.cooldown,
   Icone: ability.icon,
   Efeito: ability.effect,
-  Dano: ability.damage,
+  Dano: ability.damage || undefined, // Dano no formato XdY
+  Classes: ability.classes && ability.classes.length > 0 ? ability.classes.join(',') : undefined, // Converte array para string
 });
 
+// Classes disponíveis
+const AVAILABLE_CLASSES = [
+  "Guerreiro",
+  "Mago",
+  "Ladino",
+  "Ranger",
+  "Feiticeiro",
+  "Druida",
+  "Clérigo",
+  "Bardo",
+  "Paladino",
+  "Monge",
+  "Bárbaro",
+  "Bruxo",
+];
+
 export default function Spells() {
+  const { activeCampaign } = useCampaign(); // Hook para obter campanha ativa
   // Estados para Spells
   const [searchTerm, setSearchTerm] = useState("");
   const [categoryFilter, setCategoryFilter] = useState<string>("all");
   const [levelFilter, setLevelFilter] = useState<string>("all");
+  const [classFilter, setClassFilter] = useState<string>("all");
   const [selectedSpell, setSelectedSpell] = useState<Spell | null>(null);
   const [customSpells, setCustomSpells] = useState<Spell[]>([]);
   const [editingSpell, setEditingSpell] = useState<Spell | null>(null);
@@ -108,6 +136,7 @@ export default function Spells() {
   // Estados para Abilities
   const [searchTermAbility, setSearchTermAbility] = useState("");
   const [typeFilter, setTypeFilter] = useState<string>("all");
+  const [classFilterAbility, setClassFilterAbility] = useState<string>("all");
   const [selectedAbility, setSelectedAbility] = useState<Ability | null>(null);
   const [abilities, setAbilities] = useState<Ability[]>([]);
   const [editingAbility, setEditingAbility] = useState<Ability | null>(null);
@@ -115,11 +144,19 @@ export default function Spells() {
   const [loadingAbilities, setLoadingAbilities] = useState(true);
   const [savingAbility, setSavingAbility] = useState(false);
 
-  // Carregar magias do backend
+  // Carregar magias do backend filtradas por campanha
   const loadSpells = async () => {
     try {
       setLoading(true);
-      const apiSpells = await api.spells.getAll();
+      // Adicionar filtro de campanha na URL se houver campanha ativa
+      const url = activeCampaign 
+        ? `http://localhost:8000/magias/?campanha_id=${activeCampaign.Id}`
+        : 'http://localhost:8000/magias/';
+      
+      const response = await fetch(url);
+      if (!response.ok) throw new Error('Erro ao carregar magias');
+      
+      const apiSpells = await response.json();
       const converted = apiSpells.map(fromApiSpell);
       setCustomSpells(converted);
     } catch (error) {
@@ -136,11 +173,19 @@ export default function Spells() {
     }
   };
 
-  // Carregar habilidades do backend
+  // Carregar habilidades do backend filtradas por campanha
   const loadAbilities = async () => {
     try {
       setLoadingAbilities(true);
-      const apiAbilities = await api.abilities.getAll();
+      // Adicionar filtro de campanha na URL se houver campanha ativa
+      const url = activeCampaign 
+        ? `http://localhost:8000/habilidades/?campanha_id=${activeCampaign.Id}`
+        : 'http://localhost:8000/habilidades/';
+      
+      const response = await fetch(url);
+      if (!response.ok) throw new Error('Erro ao carregar habilidades');
+      
+      const apiAbilities = await response.json();
       const converted = apiAbilities.map(fromApiAbility);
       setAbilities(converted);
     } catch (error) {
@@ -157,10 +202,13 @@ export default function Spells() {
     }
   };
 
+  // Recarregar quando a campanha ativa mudar
   useEffect(() => {
-    loadSpells();
-    loadAbilities();
-  }, []);
+    if (activeCampaign) {
+      loadSpells();
+      loadAbilities();
+    }
+  }, [activeCampaign]);
 
   const saveCustomSpells = (newSpells: Spell[]) => {
     setCustomSpells(newSpells);
@@ -181,10 +229,16 @@ export default function Spells() {
         spell.description.toLowerCase().includes(searchTerm.toLowerCase());
       const matchesCategory = categoryFilter === "all" || spell.category === categoryFilter;
       const matchesLevel = levelFilter === "all" || spell.level.toString() === levelFilter;
+      
+      // Filtro por classe: se "all", mostra tudo; se uma classe, mostra magias sem restrição OU com essa classe
+      const matchesClass = classFilter === "all" || 
+        !spell.classes || 
+        spell.classes.length === 0 || 
+        spell.classes.includes(classFilter);
 
-      return matchesSearch && matchesCategory && matchesLevel;
+      return matchesSearch && matchesCategory && matchesLevel && matchesClass;
     });
-  }, [allSpells, searchTerm, categoryFilter, levelFilter]);
+  }, [allSpells, searchTerm, categoryFilter, levelFilter, classFilter]);
 
   const uniqueLevels = Array.from(new Set(allSpells.map(s => s.level))).sort((a, b) => a - b);
 
@@ -194,10 +248,16 @@ export default function Spells() {
       const matchesSearch = ability.name.toLowerCase().includes(searchTermAbility.toLowerCase()) ||
         ability.description.toLowerCase().includes(searchTermAbility.toLowerCase());
       const matchesType = typeFilter === "all" || ability.type === typeFilter;
+      
+      // Filtro por classe: se "all", mostra tudo; se uma classe, mostra habilidades sem restrição OU com essa classe
+      const matchesClass = classFilterAbility === "all" || 
+        !ability.classes || 
+        ability.classes.length === 0 || 
+        ability.classes.includes(classFilterAbility);
 
-      return matchesSearch && matchesType;
+      return matchesSearch && matchesType && matchesClass;
     });
-  }, [abilities, searchTermAbility, typeFilter]);
+  }, [abilities, searchTermAbility, typeFilter, classFilterAbility]);
 
   const handleCreateSpell = () => {
     const newSpell = createNewSpell();
@@ -468,7 +528,7 @@ export default function Spells() {
 
         {/* Search and Filters */}
         <div className="rpg-card mb-8">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
             <div className="md:col-span-1">
               <Label className="font-heading font-semibold flex items-center space-x-2 mb-2">
                 <Search className="h-4 w-4" />
@@ -513,6 +573,26 @@ export default function Spells() {
                   {uniqueLevels.map((level) => (
                     <SelectItem key={level} value={level.toString()}>
                       Level {level}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div>
+              <Label className="font-heading font-semibold flex items-center space-x-2 mb-2">
+                <Users className="h-4 w-4" />
+                <span>Class</span>
+              </Label>
+              <Select value={classFilter} onValueChange={setClassFilter}>
+                <SelectTrigger className="font-body">
+                  <SelectValue placeholder="All classes" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Classes</SelectItem>
+                  {AVAILABLE_CLASSES.map((className) => (
+                    <SelectItem key={className} value={className}>
+                      {className}
                     </SelectItem>
                   ))}
                 </SelectContent>
@@ -565,7 +645,7 @@ export default function Spells() {
 
             {/* Spell Details Dialog */}
             <Dialog open={!!selectedSpell} onOpenChange={(open) => !open && setSelectedSpell(null)}>
-              <DialogContent className="rpg-card max-w-2xl">
+              <DialogContent className="rpg-card max-w-2xl max-h-[90vh] overflow-y-auto">
                 {selectedSpell && (
                   <>
               <DialogHeader>
@@ -628,10 +708,20 @@ export default function Spells() {
                   {selectedSpell.cooldown !== undefined && (
                     <div className="rpg-card bg-accent/20">
                       <div className="flex items-center space-x-2 mb-2">
-                        <Target className="h-5 w-5 text-primary" />
+                        <Clock className="h-5 w-5 text-blue-500" />
                         <h4 className="font-heading font-semibold">Cooldown</h4>
                       </div>
-                      <p className="text-sm">{selectedSpell.cooldown} turn{selectedSpell.cooldown !== 1 ? 's' : ''}</p>
+                      <p className="text-sm">{selectedSpell.cooldown} second{selectedSpell.cooldown !== 1 ? 's' : ''}</p>
+                    </div>
+                  )}
+
+                  {selectedSpell.damage && (
+                    <div className="rpg-card bg-accent/20">
+                      <div className="flex items-center space-x-2 mb-2">
+                        <Dices className="h-5 w-5 text-destructive" />
+                        <h4 className="font-heading font-semibold">Damage</h4>
+                      </div>
+                      <p className="text-sm font-semibold text-destructive">{selectedSpell.damage}</p>
                     </div>
                   )}
                 </div>
@@ -645,6 +735,22 @@ export default function Spells() {
                     <DialogDescription className="text-base leading-relaxed">
                       {selectedSpell.effect}
                     </DialogDescription>
+                  </div>
+                )}
+
+                {selectedSpell.classes && selectedSpell.classes.length > 0 && (
+                  <div>
+                    <h3 className="font-heading font-bold text-lg mb-2 flex items-center space-x-2">
+                      <Users className="h-5 w-5 text-primary" />
+                      <span>Classes that can use</span>
+                    </h3>
+                    <div className="flex flex-wrap gap-2">
+                      {selectedSpell.classes.map((className) => (
+                        <Badge key={className} variant="outline" className="border-primary text-primary">
+                          {className}
+                        </Badge>
+                      ))}
+                    </div>
                   </div>
                 )}
 
@@ -698,7 +804,7 @@ export default function Spells() {
 
             {/* Search and Filters */}
             <div className="rpg-card mb-8">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div>
                   <Label className="font-heading font-semibold flex items-center space-x-2 mb-2">
                     <Search className="h-4 w-4" />
@@ -727,6 +833,26 @@ export default function Spells() {
                       <SelectItem value="active">Active</SelectItem>
                       <SelectItem value="ultimate">Ultimate</SelectItem>
                       <SelectItem value="special">Special</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                <div>
+                  <Label className="font-heading font-semibold flex items-center space-x-2 mb-2">
+                    <Users className="h-4 w-4" />
+                    <span>Class</span>
+                  </Label>
+                  <Select value={classFilterAbility} onValueChange={setClassFilterAbility}>
+                    <SelectTrigger className="font-body">
+                      <SelectValue placeholder="All classes" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">All Classes</SelectItem>
+                      {AVAILABLE_CLASSES.map((className) => (
+                        <SelectItem key={className} value={className}>
+                          {className}
+                        </SelectItem>
+                      ))}
                     </SelectContent>
                   </Select>
                 </div>
@@ -779,7 +905,7 @@ export default function Spells() {
 
         {/* Ability Details Dialog */}
         <Dialog open={!!selectedAbility} onOpenChange={(open) => !open && setSelectedAbility(null)}>
-          <DialogContent className="rpg-card max-w-2xl">
+          <DialogContent className="rpg-card max-w-2xl max-h-[90vh] overflow-y-auto">
             {selectedAbility && (
               <>
                 <DialogHeader>
@@ -821,13 +947,41 @@ export default function Spells() {
                     </div>
                   )}
 
-                  {selectedAbility.cooldown !== undefined && (
-                    <div className="rpg-card bg-accent/20">
-                      <div className="flex items-center space-x-2 mb-2">
-                        <Target className="h-5 w-5 text-primary" />
-                        <h4 className="font-heading font-semibold">Cooldown</h4>
+                  <div className="grid grid-cols-2 gap-4">
+                    {selectedAbility.cooldown !== undefined && (
+                      <div className="rpg-card bg-accent/20">
+                        <div className="flex items-center space-x-2 mb-2">
+                          <Clock className="h-5 w-5 text-blue-500" />
+                          <h4 className="font-heading font-semibold">Cooldown</h4>
+                        </div>
+                        <p className="text-sm">{selectedAbility.cooldown}s</p>
                       </div>
-                      <p className="text-sm">{selectedAbility.cooldown}s</p>
+                    )}
+
+                    {selectedAbility.damage && selectedAbility.damage.trim() !== '' && (
+                      <div className="rpg-card bg-accent/20">
+                        <div className="flex items-center space-x-2 mb-2">
+                          <Dices className="h-5 w-5 text-destructive" />
+                          <h4 className="font-heading font-semibold">Damage</h4>
+                        </div>
+                        <p className="text-sm font-semibold text-destructive">{selectedAbility.damage}</p>
+                      </div>
+                    )}
+                  </div>
+
+                  {selectedAbility.classes && selectedAbility.classes.length > 0 && (
+                    <div>
+                      <h3 className="font-heading font-bold text-lg mb-2 flex items-center space-x-2">
+                        <Users className="h-5 w-5 text-primary" />
+                        <span>Classes that can use</span>
+                      </h3>
+                      <div className="flex flex-wrap gap-2">
+                        {selectedAbility.classes.map((className) => (
+                          <Badge key={className} variant="outline" className="border-primary text-primary">
+                            {className}
+                          </Badge>
+                        ))}
+                      </div>
                     </div>
                   )}
 

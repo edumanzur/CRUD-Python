@@ -8,9 +8,10 @@ import api, { Spell as ApiSpell, Ability as ApiAbility } from "@/services/api";
 
 interface CharacterSpellsAbilitiesManagerProps {
   characterId: string;
+  characterClass: string;
 }
 
-export const CharacterSpellsAbilitiesManager = ({ characterId }: CharacterSpellsAbilitiesManagerProps) => {
+export const CharacterSpellsAbilitiesManager = ({ characterId, characterClass }: CharacterSpellsAbilitiesManagerProps) => {
   const [characterSpells, setCharacterSpells] = useState<ApiSpell[]>([]);
   const [characterAbilities, setCharacterAbilities] = useState<ApiAbility[]>([]);
   const [allSpells, setAllSpells] = useState<ApiSpell[]>([]);
@@ -109,13 +110,37 @@ export const CharacterSpellsAbilitiesManager = ({ characterId }: CharacterSpells
     }
   };
 
-  const availableSpells = allSpells.filter(
-    spell => !characterSpells.some(cs => cs.Id === spell.Id)
-  );
+  const availableSpells = allSpells.filter(spell => {
+    // Filtrar magias já adicionadas
+    if (characterSpells.some(cs => cs.Id === spell.Id)) return false;
+    
+    // Filtrar por classe: se a magia tem classes definidas, verificar se a classe do personagem está incluída
+    // Se Classes estiver vazio/null, a magia está disponível para todas as classes
+    if (spell.Classes) {
+      const spellClasses = spell.Classes.split(',').map(c => c.trim());
+      if (spellClasses.length > 0 && !spellClasses.includes(characterClass)) {
+        return false;
+      }
+    }
+    
+    return true;
+  });
 
-  const availableAbilities = allAbilities.filter(
-    ability => !characterAbilities.some(ca => ca.Id === ability.Id)
-  );
+  const availableAbilities = allAbilities.filter(ability => {
+    // Filtrar habilidades já adicionadas
+    if (characterAbilities.some(ca => ca.Id === ability.Id)) return false;
+    
+    // Filtrar por classe: se a habilidade tem classes definidas, verificar se a classe do personagem está incluída
+    // Se Classes estiver vazio/null, a habilidade está disponível para todas as classes
+    if (ability.Classes) {
+      const abilityClasses = ability.Classes.split(',').map(c => c.trim());
+      if (abilityClasses.length > 0 && !abilityClasses.includes(characterClass)) {
+        return false;
+      }
+    }
+    
+    return true;
+  });
 
   console.log('📋 Listas calculadas:', {
     totalSpells: allSpells.length,

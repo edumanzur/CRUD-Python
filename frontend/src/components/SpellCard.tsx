@@ -2,7 +2,7 @@ import { Spell } from "@/types/spell";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Edit } from "lucide-react";
+import { Edit, Dices, Clock } from "lucide-react";
 
 interface SpellCardProps {
   spell: Spell;
@@ -62,6 +62,24 @@ export const SpellCard = ({ spell, onClick, onEdit }: SpellCardProps) => {
         </div>
 
         <p className="text-sm text-foreground/80 leading-relaxed">{spell.description}</p>
+
+        {/* Exibir dano e cooldown se disponíveis */}
+        {(spell.damage || spell.cooldown !== undefined) && (
+          <div className="flex items-center gap-4 pt-2 border-t border-border text-sm">
+            {spell.damage && (
+              <div className="flex items-center space-x-2">
+                <Dices className="h-4 w-4 text-destructive" />
+                <span className="font-semibold text-destructive">{spell.damage}</span>
+              </div>
+            )}
+            {spell.cooldown !== undefined && (
+              <div className="flex items-center space-x-2">
+                <Clock className="h-4 w-4 text-blue-500" />
+                <span className="font-semibold text-blue-500">{spell.cooldown}s</span>
+              </div>
+            )}
+          </div>
+        )}
       </div>
     </Card>
   );

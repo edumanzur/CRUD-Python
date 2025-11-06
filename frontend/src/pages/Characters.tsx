@@ -4,8 +4,10 @@ import { CharacterCard } from "@/components/CharacterCard";
 import { CharacterEditor } from "@/components/CharacterEditor";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Plus, RefreshCw, Search } from "lucide-react";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Plus, RefreshCw, Search, X } from "lucide-react";
 import { toast } from "sonner";
+import { useCampaign } from "@/contexts/CampaignContext";
 import rpgBanner from "@/assets/rpg-banner.png";
 import api, { Character as ApiCharacter } from "@/services/api";
 
@@ -16,6 +18,7 @@ const createNewCharacter = (): Character => ({
   class: "Guerreiro",
   race: "Humano",
   level: 1,
+  type: "Jogador",  // Padrão: Jogador
   stats: {
     vida: 100,
     forca: 10,
@@ -37,22 +40,24 @@ const createNewCharacter = (): Character => ({
 const fromApiCharacter = (apiChar: ApiCharacter): Character => ({
   id: apiChar.Id.toString(),
   name: apiChar.Nome,
-  class: apiChar.Classe_Nome || "Guerreiro",
-  race: apiChar.Raca_Nome || "Humano",
-  level: apiChar.Level || 1,
+  class: apiChar.Classe_Nome ?? "Guerreiro",
+  race: apiChar.Raca_Nome ?? "Humano",
+  level: apiChar.Level ?? 1,
+  type: apiChar.Tipo ?? "Jogador",  // Jogador, NPC, ou Monstro
+  imagemPath: apiChar.ImagemPath,  // Adicionar caminho da imagem
   stats: {
-    vida: apiChar.Vida || 100,
-    forca: apiChar.Forca || 10,
-    destreza: apiChar.Destreza || 10,
-    constituicao: apiChar.Constituicao || 10,
-    inteligencia: apiChar.Inteligencia || 10,
-    sabedoria: apiChar.Sabedoria || 10,
-    mana: apiChar.Mana || 100,
-    carisma: apiChar.Carisma || 10,
-    sorte: apiChar.Sorte || 10,
-    reputacao: apiChar.Reputacao || 0,
-    ca: apiChar.CA || 10,
-    deslocamento: apiChar.Deslocamento || 30,
+    vida: apiChar.Vida ?? 100,
+    forca: apiChar.Forca ?? 10,
+    destreza: apiChar.Destreza ?? 10,
+    constituicao: apiChar.Constituicao ?? 10,
+    inteligencia: apiChar.Inteligencia ?? 10,
+    sabedoria: apiChar.Sabedoria ?? 10,
+    mana: apiChar.Mana ?? 100,
+    carisma: apiChar.Carisma ?? 10,
+    sorte: apiChar.Sorte ?? 10,
+    reputacao: apiChar.Reputacao ?? 0,
+    ca: apiChar.CA ?? 10,
+    deslocamento: apiChar.Deslocamento ?? 30,
   },
   equipment: {},
   history: apiChar.Historia,
@@ -67,6 +72,8 @@ const toApiCharacter = (char: Character): Omit<ApiCharacter, 'Id'> => ({
   Historia: char.history || `Level ${char.level} ${char.class}`,
   Tendencia: char.alignment || "Neutro",
   Level: char.level,
+  Tipo: char.type || "Jogador",  // Jogador, NPC, ou Monstro
+  ImagemPath: char.imagemPath,  // Caminho da imagem
   Vida: char.stats.vida,
   Forca: char.stats.forca,
   Destreza: char.stats.destreza,
@@ -92,12 +99,22 @@ export default function Characters() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
+  const [typeFilter, setTypeFilter] = useState<string>("all"); // Filtro por tipo
+  const { activeCampaign } = useCampaign(); // Hook para obter campanha ativa
 
-  // Carregar personagens do backend
+  // Carregar personagens do backend filtrados por campanha
   const loadCharacters = async () => {
     try {
       setLoading(true);
-      const apiCharacters = await api.characters.getAll();
+      // Adicionar filtro de campanha na URL se houver campanha ativa
+      const url = activeCampaign 
+        ? `http://localhost:8000/personagens/?campanha_id=${activeCampaign.Id}`
+        : 'http://localhost:8000/personagens/';
+      
+      const response = await fetch(url);
+      if (!response.ok) throw new Error('Erro ao carregar personagens');
+      
+      const apiCharacters = await response.json();
       const converted = apiCharacters.map(fromApiCharacter);
       setCharacters(converted);
       if (converted.length > 0 && !selectedCharacter) {
@@ -121,29 +138,49 @@ export default function Characters() {
     }
   };
 
+  // Recarregar quando a campanha ativa mudar
   useEffect(() => {
-    loadCharacters();
-  }, []);
+    if (activeCampaign) {
+      loadCharacters();
+    }
+  }, [activeCampaign]);
 
-  // Filtrar personagens pela busca
+  // Filtrar personagens pela busca e tipo
   const filteredCharacters = useMemo(() => {
-    if (!searchTerm.trim()) return characters;
+    let filtered = characters;
     
-    const search = searchTerm.toLowerCase();
-    return characters.filter(char => 
-      char.name.toLowerCase().includes(search) ||
-      char.class?.toLowerCase().includes(search) ||
-      char.alignment?.toLowerCase().includes(search) ||
-      char.history?.toLowerCase().includes(search)
-    );
-  }, [characters, searchTerm]);
+    // Filtrar por tipo
+    if (typeFilter !== "all") {
+      filtered = filtered.filter(char => (char.type || "Jogador") === typeFilter);
+    }
+    
+    // Filtrar por termo de busca
+    if (searchTerm.trim()) {
+      const search = searchTerm.toLowerCase();
+      filtered = filtered.filter(char => 
+        char.name.toLowerCase().includes(search) ||
+        char.class?.toLowerCase().includes(search) ||
+        char.race?.toLowerCase().includes(search) ||
+        char.alignment?.toLowerCase().includes(search) ||
+        char.history?.toLowerCase().includes(search)
+      );
+    }
+    
+    return filtered;
+  }, [characters, searchTerm, typeFilter]);
 
   const handleCreateCharacter = async () => {
     const newCharacter = createNewCharacter();
     
     try {
       setSaving(true);
-      const apiChar = await api.characters.create(toApiCharacter(newCharacter));
+      const apiData = toApiCharacter(newCharacter);
+      // Adicionar Campanha_id se houver campanha ativa
+      const apiCharWithCampaign = activeCampaign 
+        ? { ...apiData, Campanha_id: activeCampaign.Id }
+        : apiData;
+      
+      const apiChar = await api.characters.create(apiCharWithCampaign);
       const converted = fromApiCharacter(apiChar);
       
       const updated = [...characters, converted];
@@ -176,7 +213,13 @@ export default function Characters() {
       const isNewCharacter = updated.id.startsWith('temp-');
       
       if (isNewCharacter) {
-        const apiChar = await api.characters.create(toApiCharacter(updated));
+        const apiData = toApiCharacter(updated);
+        // Adicionar Campanha_id se houver campanha ativa
+        const apiCharWithCampaign = activeCampaign 
+          ? { ...apiData, Campanha_id: activeCampaign.Id }
+          : apiData;
+        
+        const apiChar = await api.characters.create(apiCharWithCampaign);
         const converted = fromApiCharacter(apiChar);
         
         const newCharacters = characters.map((c) =>
@@ -187,10 +230,13 @@ export default function Characters() {
         localStorage.setItem("rpg-characters", JSON.stringify(newCharacters));
       } else {
         const id = parseInt(updated.id);
-        const apiChar = await api.characters.update(id, {
-          Id: id,
-          ...toApiCharacter(updated),
-        });
+        const apiData = toApiCharacter(updated);
+        // Manter Campanha_id ao atualizar
+        const apiCharWithCampaign = activeCampaign 
+          ? { Id: id, ...apiData, Campanha_id: activeCampaign.Id }
+          : { Id: id, ...apiData };
+        
+        const apiChar = await api.characters.update(id, apiCharWithCampaign);
         const converted = fromApiCharacter(apiChar);
         
         const newCharacters = characters.map((c) =>
@@ -302,11 +348,41 @@ export default function Characters() {
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
               <Input
                 type="text"
-                placeholder="Buscar por nome, classe, história..."
+                placeholder="Buscar por nome, classe, raça, história..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 className="pl-10 rpg-input"
               />
+            </div>
+
+            {/* Type Filter */}
+            <div className="flex gap-2">
+              <Select value={typeFilter} onValueChange={setTypeFilter}>
+                <SelectTrigger className="rpg-input flex-1">
+                  <SelectValue placeholder="Filtrar por tipo" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">Todos os tipos</SelectItem>
+                  <SelectItem value="Jogador">🟢 Jogador</SelectItem>
+                  <SelectItem value="NPC">🔵 NPC</SelectItem>
+                  <SelectItem value="Monstro">🔴 Monstro</SelectItem>
+                </SelectContent>
+              </Select>
+              
+              {(searchTerm || typeFilter !== "all") && (
+                <Button
+                  variant="outline"
+                  size="icon"
+                  onClick={() => {
+                    setSearchTerm("");
+                    setTypeFilter("all");
+                  }}
+                  title="Limpar filtros"
+                  className="shrink-0"
+                >
+                  <X className="h-4 w-4" />
+                </Button>
+              )}
             </div>
 
             {loading ? (
@@ -325,11 +401,17 @@ export default function Characters() {
             ) : (
               <>
                 {/* Results Counter */}
-                <div className="text-sm text-muted-foreground font-body px-1">
+                <div className="text-sm text-muted-foreground font-body px-1 space-y-1">
                   {filteredCharacters.length === characters.length ? (
                     <span>{characters.length} personage{characters.length !== 1 ? 'ns' : 'm'}</span>
                   ) : (
                     <span>{filteredCharacters.length} de {characters.length} personagens</span>
+                  )}
+                  {(searchTerm || typeFilter !== "all") && (
+                    <div className="text-xs">
+                      {searchTerm && <span className="block">🔍 Buscando: "{searchTerm}"</span>}
+                      {typeFilter !== "all" && <span className="block">🎯 Tipo: {typeFilter}</span>}
+                    </div>
                   )}
                 </div>
 

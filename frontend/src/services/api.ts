@@ -46,6 +46,8 @@ export interface Character {
   Historia?: string;
   Tendencia?: string;
   Level?: number;
+  Tipo?: string;  // Jogador, NPC, ou Monstro
+  ImagemPath?: string;  // Caminho da imagem do personagem
   // Novos status
   Vida?: number;
   Forca?: number;
@@ -146,6 +148,8 @@ export interface Spell {
   CustoMana?: number;
   Cooldown?: number;
   Efeito?: string;
+  Dano?: string;  // Dano no formato XdY (ex: 2d6, 1d8+2)
+  Classes?: string;  // Classes que podem usar (separadas por vírgula)
 }
 
 export const spellsApi = {
@@ -188,6 +192,8 @@ export interface Equipment {
   Defesa?: number;
   Bonus?: number;
   Peso?: number;
+  Dano?: string;  // Formato: XdY (ex: 2d4, 1d8, 3d6)
+  Proficiencia?: string;  // Ex: Armas Simples, Armas Marciais, Armaduras Leves
 }
 
 export const equipmentsApi = {
@@ -300,7 +306,8 @@ export interface Ability {
   Cooldown?: number;
   Icone?: string;
   Efeito?: string;
-  Dano?: number;
+  Dano?: string;  // Dano no formato XdY (ex: 2d6, 1d8+2)
+  Classes?: string;  // Classes que podem usar (separadas por vírgula)
 }
 
 export const abilitiesApi = {

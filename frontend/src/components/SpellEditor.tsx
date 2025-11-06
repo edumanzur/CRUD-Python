@@ -6,6 +6,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Checkbox } from "@/components/ui/checkbox";
 import { Save, Trash2, Sparkles } from "lucide-react";
 import {
   AlertDialog,
@@ -18,6 +19,22 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
+
+// Classes disponíveis
+const AVAILABLE_CLASSES = [
+  "Guerreiro",
+  "Mago",
+  "Ladino",
+  "Ranger",
+  "Feiticeiro",
+  "Druida",
+  "Clérigo",
+  "Bardo",
+  "Paladino",
+  "Monge",
+  "Bárbaro",
+  "Bruxo",
+] as const;
 
 interface SpellEditorProps {
   spell: Spell;
@@ -40,6 +57,16 @@ export function SpellEditor({ spell, onSave, onDelete, isCustomSpell = false, di
       ...prev,
       [field]: value,
     }));
+  };
+
+  const handleClassToggle = (className: string) => {
+    setEditedSpell((prev) => {
+      const currentClasses = prev.classes || [];
+      const newClasses = currentClasses.includes(className)
+        ? currentClasses.filter((c) => c !== className)
+        : [...currentClasses, className];
+      return { ...prev, classes: newClasses };
+    });
   };
 
   const handleSave = () => {
@@ -131,7 +158,7 @@ export function SpellEditor({ spell, onSave, onDelete, isCustomSpell = false, di
 
             <div>
               <Label htmlFor="cooldown" className="font-heading font-semibold">
-                Cooldown (turns)
+                Cooldown (seconds)
               </Label>
               <Input
                 id="cooldown"
@@ -143,6 +170,58 @@ export function SpellEditor({ spell, onSave, onDelete, isCustomSpell = false, di
                 disabled={!isCustomSpell}
               />
             </div>
+          </div>
+
+          {/* Dano da Magia */}
+          <div>
+            <Label className="font-heading font-semibold">
+              Dice
+            </Label>
+            <div className="flex gap-2 items-center">
+              <div className="flex-1">
+                <Input
+                  type="number"
+                  min="1"
+                  placeholder="Nº dados"
+                  value={editedSpell.damage?.split('d')[0] || ''}
+                  onChange={(e) => {
+                    const numDice = e.target.value;
+                    const diceType = editedSpell.damage?.split('d')[1] || '6';
+                    handleChange("damage", numDice && diceType ? `${numDice}d${diceType}` : '');
+                  }}
+                  className="font-body"
+                  disabled={!isCustomSpell}
+                />
+              </div>
+              <span className="text-2xl font-bold">d</span>
+              <div className="flex-1">
+                <Select
+                  value={editedSpell.damage?.split('d')[1] || '6'}
+                  onValueChange={(value) => {
+                    const numDice = editedSpell.damage?.split('d')[0] || '1';
+                    handleChange("damage", `${numDice}d${value}`);
+                  }}
+                  disabled={!isCustomSpell}
+                >
+                  <SelectTrigger className="font-body">
+                    <SelectValue placeholder="Tipo" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="2">d2</SelectItem>
+                    <SelectItem value="4">d4</SelectItem>
+                    <SelectItem value="6">d6</SelectItem>
+                    <SelectItem value="8">d8</SelectItem>
+                    <SelectItem value="10">d10</SelectItem>
+                    <SelectItem value="12">d12</SelectItem>
+                    <SelectItem value="20">d20</SelectItem>
+                    <SelectItem value="100">d100</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+            <p className="text-xs text-muted-foreground mt-1">
+              Ex: 2d6 = 2 dados de 6 lados
+            </p>
           </div>
 
           <div>
@@ -171,6 +250,31 @@ export function SpellEditor({ spell, onSave, onDelete, isCustomSpell = false, di
               className="font-body min-h-[80px]"
               disabled={!isCustomSpell}
             />
+          </div>
+
+          {/* Seleção de Classes */}
+          <div>
+            <Label className="font-heading font-semibold mb-3 block">
+              Classes que podem usar esta magia
+            </Label>
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
+              {AVAILABLE_CLASSES.map((className) => (
+                <div key={className} className="flex items-center space-x-2">
+                  <Checkbox
+                    id={`class-${className}`}
+                    checked={(editedSpell.classes || []).includes(className)}
+                    onCheckedChange={() => handleClassToggle(className)}
+                    disabled={!isCustomSpell}
+                  />
+                  <label
+                    htmlFor={`class-${className}`}
+                    className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 cursor-pointer"
+                  >
+                    {className}
+                  </label>
+                </div>
+              ))}
+            </div>
           </div>
         </div>
 

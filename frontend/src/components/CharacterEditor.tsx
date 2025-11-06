@@ -9,6 +9,7 @@ import { Minus, Plus, Save, Heart, Sword, Target, Shield, Brain, Sparkles, Dropl
 import { useState, useEffect } from "react";
 import { CharacterSpellsAbilitiesManager } from "./CharacterSpellsAbilitiesManager";
 import { CharacterEquipmentsManager } from "./CharacterEquipmentsManager";
+import { ImageUpload } from "./ImageUpload";
 
 // Classes disponíveis
 const CHARACTER_CLASSES = [
@@ -24,6 +25,7 @@ const CHARACTER_CLASSES = [
   "Monge",
   "Bárbaro",
   "Bruxo",
+  "Nenhum",
 ] as const;
 
 // Raças disponíveis
@@ -37,6 +39,7 @@ const CHARACTER_RACES = [
   "Meio-Elfo",
   "Meio-Orc",
   "Tiferino",
+  "Nenhum",
 ] as const;
 
 // Tendências disponíveis
@@ -67,6 +70,15 @@ export const CharacterEditor = ({ character, onSave, onDelete, disabled = false 
     setEditedCharacter(character);
   }, [character]);
 
+  // Calcular modificador: quando status é 0, mod é -5; a cada 2 pontos, mod aumenta em 1
+  const calculateModifier = (statValue: number): string => {
+    const modifier = Math.floor((statValue - 10) / 2);
+    if (modifier >= 0) {
+      return `(+${modifier})`;
+    }
+    return `(${modifier})`;
+  };
+
   const updateStat = (stat: keyof Character["stats"], delta: number) => {
     setEditedCharacter({
       ...editedCharacter,
@@ -77,19 +89,35 @@ export const CharacterEditor = ({ character, onSave, onDelete, disabled = false 
     });
   };
 
+  const setStatValue = (stat: keyof Character["stats"], value: string) => {
+    const numValue = value === '' ? 0 : parseInt(value);
+    if (isNaN(numValue)) return;
+    setEditedCharacter({
+      ...editedCharacter,
+      stats: {
+        ...editedCharacter.stats,
+        [stat]: Math.max(0, numValue),
+      },
+    });
+  };
+
   const StatEditor = ({
     label,
     icon: Icon,
     stat,
+    showModifier = true,
   }: {
     label: string;
     icon: typeof Sword;
     stat: keyof Character["stats"];
+    showModifier?: boolean;
   }) => (
     <div className="space-y-2">
       <div className="flex items-center space-x-2">
         <Icon className="h-5 w-5 text-primary" />
-        <Label className="font-heading font-semibold">{label}</Label>
+        <Label className="font-heading font-semibold">
+          {label} {showModifier && <span className="text-muted-foreground text-sm">{calculateModifier(editedCharacter.stats[stat])}</span>}
+        </Label>
       </div>
       <div className="flex items-center space-x-2">
         <Button
@@ -100,9 +128,13 @@ export const CharacterEditor = ({ character, onSave, onDelete, disabled = false 
         >
           <Minus className="h-5 w-5" />
         </Button>
-        <div className="flex-1 text-center font-heading text-xl font-bold">
-          {editedCharacter.stats[stat]}
-        </div>
+        <Input
+          type="number"
+          value={editedCharacter.stats[stat]}
+          onChange={(e) => setStatValue(stat, e.target.value)}
+          className="flex-1 text-center font-heading text-xl font-bold h-10 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+          min="0"
+        />
         <Button
           variant="outline"
           size="icon"
@@ -120,6 +152,16 @@ export const CharacterEditor = ({ character, onSave, onDelete, disabled = false 
       <div className="space-y-6">
         <div>
           <h2 className="text-2xl font-heading font-bold text-primary mb-4">Character Editor</h2>
+          
+          {/* Seção de Imagem */}
+          <div className="mb-6 pb-6 border-b border-border">
+            <Label className="font-heading font-semibold mb-4 block">Character Image</Label>
+            <ImageUpload
+              characterId={editedCharacter.id ? parseInt(editedCharacter.id) : undefined}
+              currentImagePath={editedCharacter.imagemPath}
+              onImageChange={(path) => setEditedCharacter({ ...editedCharacter, imagemPath: path || undefined })}
+            />
+          </div>
           
           <div className="space-y-4">
             <div>
@@ -165,6 +207,29 @@ export const CharacterEditor = ({ character, onSave, onDelete, disabled = false 
                       {raceName}
                     </SelectItem>
                   ))}
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div>
+              <Label className="font-heading font-semibold">Character Type</Label>
+              <Select
+                value={editedCharacter.type || "Jogador"}
+                onValueChange={(value) => setEditedCharacter({ ...editedCharacter, type: value })}
+              >
+                <SelectTrigger className="mt-1 font-body">
+                  <SelectValue placeholder="Selecione o tipo" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="Jogador" className="font-body">
+                    Jogador (Player)
+                  </SelectItem>
+                  <SelectItem value="NPC" className="font-body">
+                    NPC (Non-Player Character)
+                  </SelectItem>
+                  <SelectItem value="Monstro" className="font-body">
+                    Monstro (Monster)
+                  </SelectItem>
                 </SelectContent>
               </Select>
             </div>
@@ -235,24 +300,27 @@ export const CharacterEditor = ({ character, onSave, onDelete, disabled = false 
         <div>
           <h3 className="text-xl font-heading font-bold text-primary mb-4">Statistics</h3>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            <StatEditor label="Vida" icon={Heart} stat="vida" />
+            <StatEditor label="Vida" icon={Heart} stat="vida" showModifier={false} />
             <StatEditor label="Força" icon={Sword} stat="forca" />
             <StatEditor label="Destreza" icon={Target} stat="destreza" />
             <StatEditor label="Constituição" icon={Shield} stat="constituicao" />
             <StatEditor label="Inteligência" icon={Brain} stat="inteligencia" />
             <StatEditor label="Sabedoria" icon={Sparkles} stat="sabedoria" />
-            <StatEditor label="Mana" icon={Droplets} stat="mana" />
+            <StatEditor label="Mana" icon={Droplets} stat="mana" showModifier={false} />
             <StatEditor label="Carisma" icon={Users} stat="carisma" />
             <StatEditor label="Sorte" icon={Clover} stat="sorte" />
             <StatEditor label="Reputação" icon={Trophy} stat="reputacao" />
-            <StatEditor label="CA" icon={ShieldCheck} stat="ca" />
-            <StatEditor label="Deslocamento" icon={Wind} stat="deslocamento" />
+            <StatEditor label="CA" icon={ShieldCheck} stat="ca" showModifier={false} />
+            <StatEditor label="Deslocamento" icon={Wind} stat="deslocamento" showModifier={false} />
           </div>
         </div>
 
         {/* Gerenciador de Magias e Habilidades */}
         {!editedCharacter.id.startsWith('temp-') && (
-          <CharacterSpellsAbilitiesManager characterId={editedCharacter.id} />
+          <CharacterSpellsAbilitiesManager 
+            characterId={editedCharacter.id} 
+            characterClass={editedCharacter.class}
+          />
         )}
 
         {/* Gerenciador de Equipamentos */}

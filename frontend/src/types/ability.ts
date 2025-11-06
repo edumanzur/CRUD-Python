@@ -6,5 +6,6 @@ export interface Ability {
   cooldown?: number;
   icon?: string;
   effect?: string;
-  damage?: number;
+  damage?: string;  // Dano no formato XdY (ex: 2d6, 1d8+2)
+  classes?: string[];  // Classes que podem usar esta habilidade
 }

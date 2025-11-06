@@ -6,6 +6,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
 import { Save, Trash2, Package } from "lucide-react";
 import {
   AlertDialog,
@@ -26,6 +27,15 @@ interface EquipmentEditorProps {
   isCustomEquipment?: boolean;
 }
 
+// Mapeamento de emojis por tipo de equipamento
+const typeToEmoji: Record<string, string> = {
+  weapon: "⚔️",
+  armor: "🛡️",
+  accessory: "💍",
+  consumable: "🧪",
+  tool: "🔧",
+};
+
 export function EquipmentEditor({ equipment, onSave, onDelete, isCustomEquipment = false }: EquipmentEditorProps) {
   const [editedEquipment, setEditedEquipment] = useState<Equipment>(equipment);
 
@@ -35,9 +45,16 @@ export function EquipmentEditor({ equipment, onSave, onDelete, isCustomEquipment
   }, [equipment]);
 
   const handleChange = (field: keyof Equipment, value: string | number) => {
+    const updates: Partial<Equipment> = { [field]: value };
+    
+    // Se mudar o tipo, atualiza o emoji automaticamente
+    if (field === "type") {
+      updates.icon = typeToEmoji[value as string] || "⚔️";
+    }
+    
     setEditedEquipment((prev) => ({
       ...prev,
-      [field]: value,
+      ...updates,
     }));
   };
 
@@ -118,22 +135,7 @@ export function EquipmentEditor({ equipment, onSave, onDelete, isCustomEquipment
             </div>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <div>
-              <Label htmlFor="attack" className="font-heading font-semibold">
-                Attack
-              </Label>
-              <Input
-                id="attack"
-                type="number"
-                min="0"
-                value={editedEquipment.attack}
-                onChange={(e) => handleChange("attack", parseInt(e.target.value) || 0)}
-                className="font-body"
-                disabled={!isCustomEquipment}
-              />
-            </div>
-
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
               <Label htmlFor="defense" className="font-heading font-semibold">
                 Defense
@@ -150,19 +152,99 @@ export function EquipmentEditor({ equipment, onSave, onDelete, isCustomEquipment
             </div>
 
             <div>
-              <Label htmlFor="weight" className="font-heading font-semibold">
-                Weight
+              <Label htmlFor="proficiency" className="font-heading font-semibold">
+                Proficiência Necessária
               </Label>
-              <Input
-                id="weight"
-                type="number"
-                min="0"
-                step="0.1"
-                value={editedEquipment.weight}
-                onChange={(e) => handleChange("weight", parseFloat(e.target.value) || 0)}
-                className="font-body"
+              <Select
+                value={editedEquipment.proficiency || "none"}
+                onValueChange={(value) => handleChange("proficiency", value === "none" ? "" : value)}
                 disabled={!isCustomEquipment}
-              />
+              >
+                <SelectTrigger id="proficiency" className="font-body">
+                  <SelectValue placeholder="Selecione a proficiência" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="none">Nenhuma</SelectItem>
+                  <SelectItem value="Armas Simples">Armas Simples</SelectItem>
+                  <SelectItem value="Armas Marciais">Armas Marciais</SelectItem>
+                  <SelectItem value="Armaduras Leves">Armaduras Leves</SelectItem>
+                  <SelectItem value="Armaduras Médias">Armaduras Médias</SelectItem>
+                  <SelectItem value="Armaduras Pesadas">Armaduras Pesadas</SelectItem>
+                  <SelectItem value="Escudos">Escudos</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+
+          <div>
+            <Label htmlFor="weight" className="font-heading font-semibold">
+              Weight
+            </Label>
+            <Input
+              id="weight"
+              type="number"
+              min="0"
+              step="0.1"
+              value={editedEquipment.weight}
+              onChange={(e) => handleChange("weight", parseFloat(e.target.value) || 0)}
+              className="font-body"
+              disabled={!isCustomEquipment}
+            />
+          </div>
+
+          {/* Dano da Arma */}
+          <div>
+            <Label className="font-heading font-semibold">
+              Dano da Arma (Weapon Damage)
+            </Label>
+            <div className="flex gap-2 items-center">
+              <div className="flex-1">
+                <Input
+                  type="number"
+                  min="1"
+                  placeholder="Nº dados"
+                  value={editedEquipment.damage?.split('d')[0] || ''}
+                  onChange={(e) => {
+                    const numDice = e.target.value;
+                    const diceType = editedEquipment.damage?.split('d')[1] || '6';
+                    handleChange("damage", numDice && diceType ? `${numDice}d${diceType}` : '');
+                  }}
+                  className="font-body"
+                  disabled={!isCustomEquipment}
+                />
+              </div>
+              <span className="text-2xl font-bold">d</span>
+              <div className="flex-1">
+                <Select
+                  value={editedEquipment.damage?.split('d')[1] || '6'}
+                  onValueChange={(value) => {
+                    const numDice = editedEquipment.damage?.split('d')[0] || '1';
+                    handleChange("damage", `${numDice}d${value}`);
+                  }}
+                  disabled={!isCustomEquipment}
+                >
+                  <SelectTrigger className="font-body">
+                    <SelectValue placeholder="Tipo" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="2">d2</SelectItem>
+                    <SelectItem value="4">d4</SelectItem>
+                    <SelectItem value="6">d6</SelectItem>
+                    <SelectItem value="8">d8</SelectItem>
+                    <SelectItem value="10">d10</SelectItem>
+                    <SelectItem value="12">d12</SelectItem>
+                    <SelectItem value="20">d20</SelectItem>
+                    <SelectItem value="100">d100</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              {editedEquipment.damage && (
+                <div className="flex-1 text-center">
+                  <Badge variant="outline" className="text-lg font-heading">
+                    {editedEquipment.damage}
+                  </Badge>
+                </div>
+              )}
             </div>
           </div>
 
@@ -190,21 +272,6 @@ export function EquipmentEditor({ equipment, onSave, onDelete, isCustomEquipment
               onChange={(e) => handleChange("bonus", e.target.value)}
               placeholder="Special bonuses or effects..."
               className="font-body min-h-[80px]"
-              disabled={!isCustomEquipment}
-            />
-          </div>
-
-          <div>
-            <Label htmlFor="icon" className="font-heading font-semibold">
-              Icon (Emoji)
-            </Label>
-            <Input
-              id="icon"
-              value={editedEquipment.icon}
-              onChange={(e) => handleChange("icon", e.target.value)}
-              placeholder="⚔️"
-              className="font-body text-2xl"
-              maxLength={2}
               disabled={!isCustomEquipment}
             />
           </div>

@@ -162,5 +162,6 @@ class EquipamentosModel(Base):
     Defesa = Column(Integer)
     Bonus = Column(Integer)
     Peso = Column(Integer)
+    Dano = Column(String)  # Formato: XdY (ex: 2d4, 1d8, 3d6)
 
     personagens = relationship("PersonagensModel", back_populates="equipamento")

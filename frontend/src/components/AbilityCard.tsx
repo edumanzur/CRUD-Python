@@ -1,7 +1,7 @@
 import { Ability } from "@/types/ability";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Zap, Edit } from "lucide-react";
+import { Clock, Edit, Dices } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 interface AbilityCardProps {
@@ -65,14 +65,14 @@ export const AbilityCard = ({ ability, onClick, onEdit }: AbilityCardProps) => {
         <div className="flex items-center gap-4 text-xs text-muted-foreground">
           {ability.cooldown !== undefined && (
             <div className="flex items-center space-x-2">
-              <Zap className="h-3 w-3" />
-              <span>Cooldown: {ability.cooldown}s</span>
+              <Clock className="h-3 w-3 text-blue-500" />
+              <span className="font-semibold text-blue-500">{ability.cooldown}s</span>
             </div>
           )}
-          {ability.damage !== undefined && ability.damage > 0 && (
+          {ability.damage && ability.damage.trim() !== '' && (
             <div className="flex items-center space-x-2">
-              <span className="text-red-400">⚔️</span>
-              <span>Damage: {ability.damage}</span>
+              <Dices className="h-3 w-3 text-destructive" />
+              <span className="font-semibold text-destructive">{ability.damage}</span>
             </div>
           )}
         </div>
