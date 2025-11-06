@@ -11,22 +11,32 @@ from pathlib import Path
 from PIL import Image
 import io
 
+# Importar configurações
+from app.config import settings
+
 # ============================================================
 # CONFIGURAÇÃO DO BANCO
 # ============================================================
-# Banco na raiz do projeto - usar caminho absoluto para evitar confusão
-import os
-db_path = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "sistema_rpg.db"))
-DATABASE_URL = f"sqlite:///{db_path}"
-engine = create_engine(DATABASE_URL, connect_args={"check_same_thread": False})
+# Usar PostgreSQL (Supabase) via variável de ambiente
+DATABASE_URL = settings.database_url
+
+# Configuração do engine para PostgreSQL
+engine = create_engine(
+    DATABASE_URL,
+    pool_pre_ping=True,  # Verifica conexões antes de usar
+    pool_size=10,  # Tamanho do pool de conexões
+    max_overflow=20,  # Conexões extras permitidas
+    echo=settings.debug,  # Log de SQL em modo debug
+)
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 Base = declarative_base()
 
-# Debug: Mostrar caminho do banco
-print(f"🗄️  Caminho do banco de dados: {db_path}")
-print(f"🔍 Banco existe? {os.path.exists(db_path)}")
+# Debug: Mostrar informações da conexão (sem expor senha)
+print(f"🗄️  Banco de dados: PostgreSQL (Supabase)")
+print(f"🔍 Ambiente: {settings.app_env}")
 
 app = FastAPI(title="RPG API Completa + CRUD + Busca")
+
 
 # CORS - DEVE VIR ANTES DE MONTAR ARQUIVOS ESTÁTICOS
 app.add_middleware(
