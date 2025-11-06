@@ -308,15 +308,25 @@ export interface Ability {
   Efeito?: string;
   Dano?: string;  // Dano no formato XdY (ex: 2d6, 1d8+2)
   Classes?: string;  // Classes que podem usar (separadas por vírgula)
+  Campanha_id?: number;
 }
 
 export const abilitiesApi = {
-  getAll: () => fetchApi<Ability[]>('/habilidades/'),
+  getAll: (campanha_id?: number) => {
+    const url = campanha_id 
+      ? `/habilidades/?campanha_id=${campanha_id}`
+      : '/habilidades/';
+    return fetchApi<Ability[]>(url);
+  },
   
   getById: (id: number) => fetchApi<Ability>(`/habilidades/${id}`),
   
-  search: (nome: string) => 
-    fetchApi<Ability[]>(`/habilidades/search?nome=${encodeURIComponent(nome)}`),
+  search: (nome: string, campanha_id?: number) => {
+    const url = campanha_id
+      ? `/habilidades/search?nome=${encodeURIComponent(nome)}&campanha_id=${campanha_id}`
+      : `/habilidades/search?nome=${encodeURIComponent(nome)}`;
+    return fetchApi<Ability[]>(url);
+  },
   
   create: (ability: Omit<Ability, 'Id'>) =>
     fetchApi<Ability>('/habilidades/', {
