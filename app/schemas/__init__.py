@@ -14,6 +14,7 @@ class MagiaSchema(BaseModel):
     Efeito: Optional[str] = None
     Dano: Optional[str] = None  # Formato XdY (ex: 2d6, 1d8+2)
     Classes: Optional[str] = None  # Classes que podem usar (separadas por vírgula)
+    Modificador: Optional[str] = None  # Atributo do personagem (Força, Destreza, etc.)
     Campanha_id: Optional[int] = None  # Campanha à qual pertence
     
     model_config = {"from_attributes": True}
@@ -53,6 +54,7 @@ class HabilidadeSchema(BaseModel):
     Efeito: Optional[str] = None
     Dano: Optional[str] = None  # Formato XdY (ex: 1d6, 2d8, 3d6)
     Classes: Optional[str] = None  # Classes que podem usar (separadas por vírgula)
+    Modificador: Optional[str] = None  # Atributo do personagem (Força, Destreza, etc.)
     Campanha_id: Optional[int] = None  # Campanha à qual pertence
     
     model_config = {"from_attributes": True}

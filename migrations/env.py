@@ -19,7 +19,8 @@ from app.config import settings
 config = context.config
 
 # Sobrescrever a URL do banco com a variável de ambiente
-config.set_main_option("sqlalchemy.url", settings.database_url)
+# Usar %%  para escapar o % na URL (necessário para ConfigParser)
+config.set_main_option("sqlalchemy.url", settings.database_url.replace('%', '%%'))
 
 # Interpret the config file for Python logging.
 # This line sets up loggers basically.

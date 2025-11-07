@@ -149,6 +149,7 @@ export interface Spell {
   Cooldown?: number;
   Efeito?: string;
   Dano?: string;  // Dano no formato XdY (ex: 2d6, 1d8+2)
+  Modificador?: string;  // Atributo do personagem (Força, Destreza, etc.)
   Classes?: string;  // Classes que podem usar (separadas por vírgula)
 }
 
@@ -194,6 +195,7 @@ export interface Equipment {
   Peso?: number;
   Dano?: string;  // Formato: XdY (ex: 2d4, 1d8, 3d6)
   Proficiencia?: string;  // Ex: Armas Simples, Armas Marciais, Armaduras Leves
+  Modificador?: string;  // Atributo do personagem (Força, Destreza, etc.)
 }
 
 export const equipmentsApi = {
@@ -307,6 +309,7 @@ export interface Ability {
   Icone?: string;
   Efeito?: string;
   Dano?: string;  // Dano no formato XdY (ex: 2d6, 1d8+2)
+  Modificador?: string;  // Atributo do personagem (Força, Destreza, etc.)
   Classes?: string;  // Classes que podem usar (separadas por vírgula)
   Campanha_id?: number;
 }

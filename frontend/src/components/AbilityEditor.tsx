@@ -192,6 +192,38 @@ export function AbilityEditor({ ability, onSave, onDelete, disabled = false }: A
               Ex: 2d6 = 2 dados de 6 lados
             </p>
           </div>
+
+          {/* Modificador (Atributo do Personagem) */}
+          <div className="space-y-2">
+            <Label htmlFor="modifier" className="font-heading font-semibold">
+              Modifier (Character Attribute)
+            </Label>
+            <Select
+              value={editedAbility.modifier || "none"}
+              onValueChange={(value) => 
+                setEditedAbility({ 
+                  ...editedAbility, 
+                  modifier: value === "none" ? undefined : value 
+                })
+              }
+            >
+              <SelectTrigger className="font-body">
+                <SelectValue placeholder="Select attribute" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="none">None</SelectItem>
+                <SelectItem value="Força">Força (Strength)</SelectItem>
+                <SelectItem value="Destreza">Destreza (Dexterity)</SelectItem>
+                <SelectItem value="Constituição">Constituição (Constitution)</SelectItem>
+                <SelectItem value="Inteligência">Inteligência (Intelligence)</SelectItem>
+                <SelectItem value="Sabedoria">Sabedoria (Wisdom)</SelectItem>
+                <SelectItem value="Carisma">Carisma (Charisma)</SelectItem>
+              </SelectContent>
+            </Select>
+            <p className="text-xs text-muted-foreground mt-1">
+              Attribute used to calculate damage/effect bonus
+            </p>
+          </div>
         </div>
 
         <div className="space-y-2">

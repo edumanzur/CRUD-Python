@@ -55,6 +55,7 @@ const fromApiEquipment = (apiEquip: ApiEquipment): Equipment => {
     weight: apiEquip.Peso || 1,
     damage: apiEquip.Dano || "",  // Campo de dano
     proficiency: apiEquip.Proficiencia || "",  // Campo de proficiência
+    modifier: apiEquip.Modificador || undefined,  // Atributo do personagem
     isCustom: true,
   };
 };
@@ -72,6 +73,7 @@ const toApiEquipment = (equip: Equipment): Omit<ApiEquipment, 'Id'> => ({
   Peso: equip.weight,
   Dano: equip.damage || "",  // Campo de dano
   Proficiencia: equip.proficiency || "",  // Campo de proficiência
+  Modificador: equip.modifier || undefined,  // Atributo do personagem
 });
 
 export default function Equipments() {

@@ -60,6 +60,7 @@ const fromApiSpell = (apiSpell: ApiSpell): Spell => ({
   cooldown: apiSpell.Cooldown || 0,
   effect: apiSpell.Efeito || apiSpell.Descricao,
   damage: apiSpell.Dano || "", // Dano no formato XdY
+  modifier: apiSpell.Modificador || undefined, // Atributo do personagem
   classes: apiSpell.Classes ? apiSpell.Classes.split(',').map(c => c.trim()) : [], // Converte string para array
   isCustom: true, // Marcar como custom para permitir edição
 });
@@ -75,6 +76,7 @@ const toApiSpell = (spell: Spell): Omit<ApiSpell, 'Id'> => ({
   Cooldown: spell.cooldown,
   Efeito: spell.effect,
   Dano: spell.damage || undefined, // Dano no formato XdY
+  Modificador: spell.modifier || undefined, // Atributo do personagem
   Classes: spell.classes && spell.classes.length > 0 ? spell.classes.join(',') : undefined, // Converte array para string
 });
 
@@ -88,6 +90,7 @@ const fromApiAbility = (apiAbility: ApiAbility): Ability => ({
   icon: apiAbility.Icone || "⚡",
   effect: apiAbility.Efeito || apiAbility.Descricao,
   damage: apiAbility.Dano || "", // Dano no formato XdY
+  modifier: apiAbility.Modificador || undefined, // Atributo do personagem
   classes: apiAbility.Classes ? apiAbility.Classes.split(',').map(c => c.trim()) : [], // Converte string para array
 });
 
@@ -100,6 +103,7 @@ const toApiAbility = (ability: Ability): Omit<ApiAbility, 'Id'> => ({
   Icone: ability.icon,
   Efeito: ability.effect,
   Dano: ability.damage || undefined, // Dano no formato XdY
+  Modificador: ability.modifier || undefined, // Atributo do personagem
   Classes: ability.classes && ability.classes.length > 0 ? ability.classes.join(',') : undefined, // Converte array para string
 });
 
@@ -117,6 +121,16 @@ const AVAILABLE_CLASSES = [
   "Monge",
   "Bárbaro",
   "Bruxo",
+];
+
+// Atributos do personagem disponíveis como modificadores
+const AVAILABLE_MODIFIERS = [
+  "Força",
+  "Destreza",
+  "Constituição",
+  "Inteligência",
+  "Sabedoria",
+  "Carisma",
 ];
 
 export default function Spells() {
@@ -719,7 +733,7 @@ export default function Spells() {
                     <div className="rpg-card bg-accent/20">
                       <div className="flex items-center space-x-2 mb-2">
                         <Dices className="h-5 w-5 text-destructive" />
-                        <h4 className="font-heading font-semibold">Damage</h4>
+                        <h4 className="font-heading font-semibold">Dice</h4>
                       </div>
                       <p className="text-sm font-semibold text-destructive">{selectedSpell.damage}</p>
                     </div>
@@ -962,7 +976,7 @@ export default function Spells() {
                       <div className="rpg-card bg-accent/20">
                         <div className="flex items-center space-x-2 mb-2">
                           <Dices className="h-5 w-5 text-destructive" />
-                          <h4 className="font-heading font-semibold">Damage</h4>
+                          <h4 className="font-heading font-semibold">Dice</h4>
                         </div>
                         <p className="text-sm font-semibold text-destructive">{selectedAbility.damage}</p>
                       </div>

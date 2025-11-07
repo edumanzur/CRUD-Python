@@ -92,6 +92,7 @@ class MagiasModel(Base):
     Efeito = Column(Text)
     Dano = Column(String)  # Dano no formato XdY (ex: 2d6, 1d8+2)
     Classes = Column(String)  # Classes que podem usar (separadas por vírgula)
+    Modificador = Column(String)  # Atributo do personagem usado como modificador (Força, Destreza, etc.)
     Campanha_id = Column(Integer, nullable=True)  # Campanha à qual pertence
 
 
@@ -106,6 +107,7 @@ class HabilidadesModel(Base):
     Efeito = Column(Text)
     Dano = Column(String)  # Dano no formato XdY (ex: 2d6, 1d8+2)
     Classes = Column(String)  # Classes que podem usar (separadas por vírgula)
+    Modificador = Column(String)  # Atributo do personagem usado como modificador (Força, Destreza, etc.)
     Campanha_id = Column(Integer, nullable=True)  # Campanha à qual pertence
 
 
@@ -191,6 +193,7 @@ class EquipamentosModel(Base):
     Peso = Column(Integer)
     Dano = Column(String)  # Formato: XdY (ex: 2d4, 1d8, 3d6)
     Proficiencia = Column(String)  # Ex: Armas Simples, Armas Marciais, Armaduras Leves
+    Modificador = Column(String)  # Atributo do personagem usado como modificador (Força, Destreza, etc.)
     Campanha_id = Column(Integer, nullable=True)  # Campanha à qual pertence
 
     personagens = relationship("PersonagensModel", back_populates="equipamento")
@@ -276,6 +279,7 @@ class EquipamentoSchema(BaseModel):
     Peso: Optional[int] = None
     Dano: Optional[str] = None  # Formato: XdY (ex: 2d4, 1d8, 3d6)
     Proficiencia: Optional[str] = None  # Ex: Armas Simples, Armas Marciais
+    Modificador: Optional[str] = None  # Atributo do personagem (Força, Destreza, etc.)
     Campanha_id: Optional[int] = None  # Campanha à qual pertence
     model_config = {"from_attributes": True}
 
