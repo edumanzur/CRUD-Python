@@ -1,5 +1,5 @@
 import { Link, useLocation } from "react-router-dom";
-import { Swords, BookOpen, Package, Dices, Settings } from "lucide-react";
+import { Swords, BookOpen, Package, Dices, Settings, Shield, Users2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { CampaignSelector } from "./CampaignSelector";
 
@@ -9,10 +9,12 @@ export const Navigation = () => {
 
   const links = [
     { to: "/", label: "Characters", icon: Swords },
-    { to: "/spells", label: "Spells & Abilities", icon: BookOpen },
-    { to: "/equipments", label: "Equipment", icon: Package },
+    { to: "/classes", label: "Classes", icon: Shield },
+    { to: "/races", label: "Races", icon: Users2 },
+    { to: "/spells", label: "Spells", icon: BookOpen },
+    { to: "/equipments", label: "Items", icon: Package },
     { to: "/campaigns", label: "Campaigns", icon: Settings },
-    { to: "/dice", label: "Dice Roller", icon: Dices },
+    { to: "/dice", label: "Dice", icon: Dices },
   ];
 
   return (
@@ -33,7 +35,7 @@ export const Navigation = () => {
           </div>
 
           {/* Navigation Links - Center */}
-          <div className="hidden lg:flex items-center gap-2 flex-1 justify-center max-w-3xl">
+          <div className="hidden lg:flex items-center gap-2 flex-1 justify-center max-w-4xl">
             {links.map(({ to, label, icon: Icon }) => {
               const isActive = location.pathname === to;
               return (

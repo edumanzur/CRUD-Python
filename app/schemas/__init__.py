@@ -174,3 +174,60 @@ class PersonagemUpdateSchema(BaseModel):
     Raca_id: Optional[int] = None
     Classe_id: Optional[int] = None
     Equipamento_id: Optional[int] = None
+
+
+# ============================================================
+# SCHEMAS PARA CLASSES
+# ============================================================
+class ClasseSchema(BaseModel):
+    """Schema completo de Classe"""
+    Id: int
+    Nome: str
+    Descricao: Optional[str] = None
+    Habilidades_id: Optional[int] = None
+    Magias_id: Optional[int] = None
+    
+    model_config = {"from_attributes": True}
+
+
+class ClasseCreateSchema(BaseModel):
+    """Schema para criação de classe (sem Id)"""
+    Nome: str
+    Descricao: Optional[str] = None
+    Habilidades_id: Optional[int] = None
+    Magias_id: Optional[int] = None
+
+
+class ClasseUpdateSchema(BaseModel):
+    """Schema para atualização de classe"""
+    Nome: Optional[str] = None
+    Descricao: Optional[str] = None
+    Habilidades_id: Optional[int] = None
+    Magias_id: Optional[int] = None
+
+
+# ============================================================
+# SCHEMAS PARA RAÇAS
+# ============================================================
+class RacaSchema(BaseModel):
+    """Schema completo de Raça"""
+    Id: int
+    Nome: str
+    Passiva: Optional[str] = None  # Habilidade passiva da raça
+    Caracteristica: Optional[str] = None  # Características raciais
+    
+    model_config = {"from_attributes": True}
+
+
+class RacaCreateSchema(BaseModel):
+    """Schema para criação de raça (sem Id)"""
+    Nome: str
+    Passiva: Optional[str] = None
+    Caracteristica: Optional[str] = None
+
+
+class RacaUpdateSchema(BaseModel):
+    """Schema para atualização de raça"""
+    Nome: Optional[str] = None
+    Passiva: Optional[str] = None
+    Caracteristica: Optional[str] = None

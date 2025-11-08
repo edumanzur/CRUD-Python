@@ -10,37 +10,7 @@ import { useState, useEffect } from "react";
 import { CharacterSpellsAbilitiesManager } from "./CharacterSpellsAbilitiesManager";
 import { CharacterEquipmentsManager } from "./CharacterEquipmentsManager";
 import { ImageUpload } from "./ImageUpload";
-
-// Classes disponíveis
-const CHARACTER_CLASSES = [
-  "Guerreiro",
-  "Mago",
-  "Ladino",
-  "Ranger",
-  "Feiticeiro",
-  "Druida",
-  "Clérigo",
-  "Bardo",
-  "Paladino",
-  "Monge",
-  "Bárbaro",
-  "Bruxo",
-  "Nenhum",
-] as const;
-
-// Raças disponíveis
-const CHARACTER_RACES = [
-  "Anão",
-  "Elfo",
-  "Halfling",
-  "Humano",
-  "Draconato",
-  "Gnomo",
-  "Meio-Elfo",
-  "Meio-Orc",
-  "Tiferino",
-  "Nenhum",
-] as const;
+import api from "@/services/api";
 
 // Tendências disponíveis
 const CHARACTER_ALIGNMENTS = [
@@ -64,6 +34,31 @@ interface CharacterEditorProps {
 
 export const CharacterEditor = ({ character, onSave, onDelete, disabled = false }: CharacterEditorProps) => {
   const [editedCharacter, setEditedCharacter] = useState<Character>(character);
+  const [availableClasses, setAvailableClasses] = useState<string[]>([]);
+  const [availableRaces, setAvailableRaces] = useState<string[]>([]);
+
+  // Carregar classes e raças da API
+  useEffect(() => {
+    const loadClassesAndRaces = async () => {
+      try {
+        const [classesData, racesData] = await Promise.all([
+          api.classes.getAll(),
+          api.races.getAll(),
+        ]);
+        
+        // Adicionar "Nenhum/a" como primeira opção
+        setAvailableClasses(["Nenhuma", ...classesData.map(c => c.Nome)]);
+        setAvailableRaces(["Nenhuma", ...racesData.map(r => r.Nome)]);
+      } catch (error) {
+        console.error("Erro ao carregar classes/raças:", error);
+        // Fallback para valores padrão se a API falhar
+        setAvailableClasses(["Nenhuma", "Guerreiro", "Mago", "Ladino", "Ranger"]);
+        setAvailableRaces(["Nenhuma", "Humano", "Elfo", "Anão"]);
+      }
+    };
+    
+    loadClassesAndRaces();
+  }, []);
 
   // Sincronizar estado interno quando o personagem selecionado mudar
   useEffect(() => {
@@ -188,7 +183,7 @@ export const CharacterEditor = ({ character, onSave, onDelete, disabled = false 
                   <SelectValue placeholder="Selecione uma classe" />
                 </SelectTrigger>
                 <SelectContent>
-                  {CHARACTER_CLASSES.map((className) => (
+                  {availableClasses.map((className) => (
                     <SelectItem key={className} value={className} className="font-body">
                       {className}
                     </SelectItem>
@@ -207,7 +202,7 @@ export const CharacterEditor = ({ character, onSave, onDelete, disabled = false 
                   <SelectValue placeholder="Selecione uma raça" />
                 </SelectTrigger>
                 <SelectContent>
-                  {CHARACTER_RACES.map((raceName) => (
+                  {availableRaces.map((raceName) => (
                     <SelectItem key={raceName} value={raceName} className="font-body">
                       {raceName}
                     </SelectItem>

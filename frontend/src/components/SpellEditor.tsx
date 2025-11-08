@@ -8,6 +8,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Save, Trash2, Sparkles } from "lucide-react";
+import api from "@/services/api";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -20,22 +21,6 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 
-// Classes disponíveis
-const AVAILABLE_CLASSES = [
-  "Guerreiro",
-  "Mago",
-  "Ladino",
-  "Ranger",
-  "Feiticeiro",
-  "Druida",
-  "Clérigo",
-  "Bardo",
-  "Paladino",
-  "Monge",
-  "Bárbaro",
-  "Bruxo",
-] as const;
-
 interface SpellEditorProps {
   spell: Spell;
   onSave: (spell: Spell) => void;
@@ -46,6 +31,22 @@ interface SpellEditorProps {
 
 export function SpellEditor({ spell, onSave, onDelete, isCustomSpell = false, disabled = false }: SpellEditorProps) {
   const [editedSpell, setEditedSpell] = useState<Spell>(spell);
+  const [availableClasses, setAvailableClasses] = useState<string[]>([]);
+
+  // Carregar classes disponíveis da API
+  useEffect(() => {
+    const loadClasses = async () => {
+      try {
+        const classesData = await api.classes.getAll();
+        setAvailableClasses(classesData.map((c: any) => c.Nome));
+      } catch (error) {
+        console.error("Erro ao carregar classes:", error);
+        // Fallback para algumas classes padrão em caso de erro
+        setAvailableClasses(["Guerreiro", "Mago", "Ladino", "Clérigo"]);
+      }
+    };
+    loadClasses();
+  }, []);
 
   // Sincronizar estado interno quando a magia selecionada mudar
   useEffect(() => {
@@ -286,7 +287,7 @@ export function SpellEditor({ spell, onSave, onDelete, isCustomSpell = false, di
               Classes que podem usar esta magia
             </Label>
             <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
-              {AVAILABLE_CLASSES.map((className) => (
+              {availableClasses.map((className) => (
                 <div key={className} className="flex items-center space-x-2">
                   <Checkbox
                     id={`class-${className}`}

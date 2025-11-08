@@ -8,6 +8,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Save, Trash2, Zap } from "lucide-react";
+import api from "@/services/api";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -20,22 +21,6 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 
-// Classes disponíveis
-const AVAILABLE_CLASSES = [
-  "Guerreiro",
-  "Mago",
-  "Ladino",
-  "Ranger",
-  "Feiticeiro",
-  "Druida",
-  "Clérigo",
-  "Bardo",
-  "Paladino",
-  "Monge",
-  "Bárbaro",
-  "Bruxo",
-] as const;
-
 interface AbilityEditorProps {
   ability: Ability;
   onSave: (ability: Ability) => void;
@@ -45,6 +30,22 @@ interface AbilityEditorProps {
 
 export function AbilityEditor({ ability, onSave, onDelete, disabled = false }: AbilityEditorProps) {
   const [editedAbility, setEditedAbility] = useState<Ability>(ability);
+  const [availableClasses, setAvailableClasses] = useState<string[]>([]);
+
+  // Carregar classes disponíveis da API
+  useEffect(() => {
+    const loadClasses = async () => {
+      try {
+        const classesData = await api.classes.getAll();
+        setAvailableClasses(classesData.map((c: any) => c.Nome));
+      } catch (error) {
+        console.error("Erro ao carregar classes:", error);
+        // Fallback para algumas classes padrão em caso de erro
+        setAvailableClasses(["Guerreiro", "Mago", "Ladino", "Clérigo"]);
+      }
+    };
+    loadClasses();
+  }, []);
 
   useEffect(() => {
     setEditedAbility(ability);
@@ -259,7 +260,7 @@ export function AbilityEditor({ ability, onSave, onDelete, disabled = false }: A
             Classes que podem usar esta habilidade
           </Label>
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
-            {AVAILABLE_CLASSES.map((className) => (
+            {availableClasses.map((className) => (
               <div key={className} className="flex items-center space-x-2">
                 <Checkbox
                   id={`ability-class-${className}`}
