@@ -33,9 +33,6 @@ const getTypeInfo = (type?: string) => {
 export const CharacterCard = ({ character, onSelect, isSelected }: CharacterCardProps) => {
   const typeInfo = getTypeInfo(character.type);
   const TypeIcon = typeInfo.icon;
-  const imageUrl = character.imagemPath 
-    ? `http://localhost:8000${character.imagemPath}`
-    : null;
 
   return (
     <Card
@@ -45,17 +42,6 @@ export const CharacterCard = ({ character, onSelect, isSelected }: CharacterCard
       }`}
     >
       <div className="space-y-3">
-        {/* Imagem do Personagem */}
-        {imageUrl && (
-          <div className="relative w-full h-48 rounded-lg overflow-hidden border-2 border-primary/20 mb-3">
-            <img
-              src={imageUrl}
-              alt={character.name}
-              className="w-full h-full object-cover"
-            />
-          </div>
-        )}
-
         <div className="flex items-center justify-between">
           <h3 className="text-xl font-heading font-bold text-primary">{character.name}</h3>
           <span className="text-sm font-semibold bg-secondary/70 px-3 py-1 rounded-full border border-secondary">
