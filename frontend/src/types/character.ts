@@ -20,6 +20,10 @@ export interface Character {
     ca: number;  // Classe de Armadura
     deslocamento: number;  // Velocidade de movimento
   };
+  // Campos específicos para Monstros
+  exp?: number;  // Experiência dada ao derrotar
+  imunidade?: string;  // Imunidades do monstro
+  resistencia?: string;  // Resistências do monstro
   equipment: {
     weapon?: string;
     armor?: string;

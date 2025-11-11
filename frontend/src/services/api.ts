@@ -66,6 +66,10 @@ export interface Character {
   Raca_id?: number;
   Classe_id?: number;
   Equipamento_id?: number;
+  // Campos específicos para Monstros
+  Exp?: number;  // Experiência dada ao derrotar
+  Imunidade?: string;  // Imunidades do monstro
+  Resistencia?: string;  // Resistências do monstro
   magias?: Spell[];
   habilidades?: Ability[];
 }

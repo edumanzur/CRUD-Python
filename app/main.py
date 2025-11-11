@@ -152,6 +152,11 @@ class PersonagensModel(Base):
     Equipamento_id = Column(Integer, ForeignKey("Equipamentos.Id"), nullable=True)
     Campanha_id = Column(Integer, nullable=True)  # Campanha à qual pertence
     ImagemPath = Column(Text, nullable=True)  # Caminho da imagem do personagem
+    
+    # Campos específicos para Monstros
+    Exp = Column(Integer, nullable=True)  # Experiência dada ao derrotar (apenas para monstros)
+    Imunidade = Column(Text, nullable=True)  # Imunidades do monstro (ex: "Fogo, Veneno")
+    Resistencia = Column(Text, nullable=True)  # Resistências do monstro (ex: "Gelo, Trovão")
 
     raca = relationship("RacasModel", back_populates="personagens")
     classe = relationship("ClasseModel", back_populates="personagens")
@@ -308,6 +313,12 @@ class PersonagemSchema(BaseModel):
     Raca_Nome: Optional[str] = "Humano"  # Nome da raça do personagem
     Campanha_id: Optional[int] = None  # Campanha à qual pertence
     ImagemPath: Optional[str] = None  # Caminho da imagem do personagem
+    
+    # Campos específicos para Monstros
+    Exp: Optional[int] = None  # Experiência dada ao derrotar (apenas para monstros)
+    Imunidade: Optional[str] = None  # Imunidades do monstro
+    Resistencia: Optional[str] = None  # Resistências do monstro
+    
     raca: Optional[RacaSchema] = None
     classe: Optional[ClasseSchema] = None
     equipamento: Optional[EquipamentoSchema] = None

@@ -59,6 +59,10 @@ const fromApiCharacter = (apiChar: ApiCharacter): Character => ({
     ca: apiChar.CA ?? 10,
     deslocamento: apiChar.Deslocamento ?? 30,
   },
+  // Campos específicos para Monstros
+  exp: apiChar.Exp,
+  imunidade: apiChar.Imunidade,
+  resistencia: apiChar.Resistencia,
   equipment: {},
   history: apiChar.Historia,
   alignment: apiChar.Tendencia,
@@ -88,6 +92,10 @@ const toApiCharacter = (char: Character): Omit<ApiCharacter, 'Id'> => ({
   Deslocamento: char.stats.deslocamento,
   Classe_Nome: char.class,
   Raca_Nome: char.race || "Humano",
+  // Campos específicos para Monstros
+  Exp: char.exp,
+  Imunidade: char.imunidade,
+  Resistencia: char.resistencia,
   Raca_id: null,
   Classe_id: null,
   Equipamento_id: null,

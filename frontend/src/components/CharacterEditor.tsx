@@ -234,6 +234,51 @@ export const CharacterEditor = ({ character, onSave, onDelete, disabled = false 
               </Select>
             </div>
 
+            {/* Campos específicos para Monstros */}
+            {editedCharacter.type === "Monstro" && (
+              <>
+                <div>
+                  <Label className="font-heading font-semibold">Experiência (EXP)</Label>
+                  <Input
+                    type="number"
+                    value={editedCharacter.exp || 0}
+                    onChange={(e) => setEditedCharacter({ 
+                      ...editedCharacter, 
+                      exp: parseInt(e.target.value) || 0 
+                    })}
+                    className="mt-1 font-body"
+                    placeholder="XP dado ao derrotar"
+                  />
+                </div>
+
+                <div>
+                  <Label className="font-heading font-semibold">Imunidades</Label>
+                  <Input
+                    value={editedCharacter.imunidade || ""}
+                    onChange={(e) => setEditedCharacter({ 
+                      ...editedCharacter, 
+                      imunidade: e.target.value 
+                    })}
+                    className="mt-1 font-body"
+                    placeholder="Ex: Fogo, Veneno, Atordoamento"
+                  />
+                </div>
+
+                <div>
+                  <Label className="font-heading font-semibold">Resistências</Label>
+                  <Input
+                    value={editedCharacter.resistencia || ""}
+                    onChange={(e) => setEditedCharacter({ 
+                      ...editedCharacter, 
+                      resistencia: e.target.value 
+                    })}
+                    className="mt-1 font-body"
+                    placeholder="Ex: Gelo, Trovão, Cortante"
+                  />
+                </div>
+              </>
+            )}
+
             <div>
               <Label className="font-heading font-semibold">Level</Label>
               <div className="flex items-center gap-2 mt-1">
