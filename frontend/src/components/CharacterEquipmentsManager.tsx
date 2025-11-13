@@ -20,45 +20,64 @@ export const CharacterEquipmentsManager = ({ characterId }: CharacterEquipmentsM
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    loadData();
+    if (!characterId || characterId.startsWith('temp-')) return;
+    loadData().catch(error => {
+      console.error('❌ Erro no useEffect loadData:', error);
+    });
   }, [characterId]);
 
   // Recarregar quando a campanha ativa mudar
   useEffect(() => {
-    if (activeCampaign && !characterId.startsWith('temp-')) {
-      loadData();
+    if (activeCampaign && characterId && !characterId.startsWith('temp-')) {
+      loadData().catch(error => {
+        console.error('❌ Erro no useEffect campanha:', error);
+      });
     }
   }, [activeCampaign]);
 
   const loadData = async () => {
     if (characterId.startsWith('temp-')) return;
     
+    // Aguardar campanha estar disponível
+    if (!activeCampaign) {
+      console.log('⏳ Aguardando campanha ativa...');
+      return;
+    }
+    
     try {
       setLoading(true);
       const id = parseInt(characterId);
       
       console.log('🔍 Carregando equipamentos para personagem ID:', id);
+      console.log('🎯 Campanha ativa:', activeCampaign);
       
       // Carregar equipamentos do personagem
       const equipments = await api.characters.getEquipments(id);
       
-      // Carregar TODOS os equipamentos da campanha ativa com fetch
-      const equipmentsUrl = activeCampaign 
-        ? `http://localhost:8000/equipamentos/?campanha_id=${activeCampaign.Id}`
-        : 'http://localhost:8000/equipamentos/';
+      // Carregar TODOS os equipamentos da campanha ativa
+      const equipmentsUrl = `http://localhost:8000/equipamentos/?campanha_id=${activeCampaign.Id}`;
+      
+      console.log('🌐 URL de equipamentos:', equipmentsUrl);
       
       const equipmentsResponse = await fetch(equipmentsUrl);
+      if (!equipmentsResponse.ok) {
+        throw new Error(`Erro HTTP: ${equipmentsResponse.status}`);
+      }
       const allEquipmentsData = await equipmentsResponse.json();
       
       console.log('📊 Equipamentos carregados:', {
         characterEquipments: equipments,
         allEquipments: allEquipmentsData,
+        availableCount: allEquipmentsData.filter((eq: ApiEquipment) => 
+          !equipments.some(ce => ce.Id === eq.Id)
+        ).length
       });
       
       setCharacterEquipments(equipments);
       setAllEquipments(allEquipmentsData);
     } catch (error) {
       console.error('❌ Erro ao carregar equipamentos:', error);
+      toast.error('Erro ao carregar equipamentos. Verifique se o servidor está rodando.');
     } finally {
       setLoading(false);
     }
@@ -66,13 +85,15 @@ export const CharacterEquipmentsManager = ({ characterId }: CharacterEquipmentsM
 
   const handleAddEquipment = async (equipmentId: number) => {
     try {
+      console.log('➕ Tentando adicionar equipamento:', equipmentId, 'ao personagem:', characterId);
       const characterIdNum = parseInt(characterId);
-      await api.characters.addEquipment(characterIdNum, equipmentId);
+      const result = await api.characters.addEquipment(characterIdNum, equipmentId);
+      console.log('✅ Equipamento adicionado:', result);
       toast.success("Equipamento adicionado com sucesso!");
       await loadData();
       setShowAddEquipment(false);
     } catch (error: any) {
-      console.error('Erro ao adicionar equipamento:', error);
+      console.error('❌ Erro ao adicionar equipamento:', error);
       toast.error(error.message || "Erro ao adicionar equipamento");
     }
   };
@@ -153,13 +174,13 @@ export const CharacterEquipmentsManager = ({ characterId }: CharacterEquipmentsM
 
       {/* Dialog para adicionar equipamento */}
       <Dialog open={showAddEquipment} onOpenChange={setShowAddEquipment}>
-        <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
+        <DialogContent className="max-w-2xl max-h-[85vh] flex flex-col">
           <DialogHeader>
             <DialogTitle className="font-heading text-2xl text-primary">
               Adicionar Equipamento
             </DialogTitle>
           </DialogHeader>
-          <div className="space-y-2">
+          <div className="space-y-2 overflow-y-auto pr-2 flex-1">
             {availableEquipments.length === 0 ? (
               <p className="text-muted-foreground">Todos os equipamentos já foram adicionados</p>
             ) : (
@@ -168,11 +189,11 @@ export const CharacterEquipmentsManager = ({ characterId }: CharacterEquipmentsM
                   key={equipment.Id}
                   className="rpg-card p-3 flex items-center justify-between hover:border-primary/50 transition-colors"
                 >
-                  <div className="flex items-center gap-3">
-                    <span className="text-2xl">{equipment.Icone || "⚔️"}</span>
-                    <div>
+                  <div className="flex items-center gap-3 flex-1 min-w-0">
+                    <span className="text-2xl flex-shrink-0">{equipment.Icone || "⚔️"}</span>
+                    <div className="flex-1 min-w-0">
                       <p className="font-heading font-semibold">{equipment.Nome}</p>
-                      <p className="text-sm text-muted-foreground">{equipment.Descricao}</p>
+                      <p className="text-sm text-muted-foreground line-clamp-2">{equipment.Descricao}</p>
                       <div className="flex gap-2 mt-1">
                         {equipment.Tipo && (
                           <Badge variant="secondary" className="text-xs">
@@ -189,7 +210,7 @@ export const CharacterEquipmentsManager = ({ characterId }: CharacterEquipmentsM
                   </div>
                   <Button
                     onClick={() => handleAddEquipment(equipment.Id)}
-                    className="rpg-button"
+                    className="rpg-button flex-shrink-0 ml-2"
                     size="sm"
                   >
                     <Plus className="h-4 w-4" />

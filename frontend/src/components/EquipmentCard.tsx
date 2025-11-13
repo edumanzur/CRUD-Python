@@ -80,7 +80,9 @@ export const EquipmentCard = ({ equipment, onClick, onEdit }: EquipmentCardProps
           )}
         </div>
 
-        <p className="text-sm text-foreground/80 leading-relaxed">{equipment.description}</p>
+        <p className="text-sm text-foreground/80 leading-relaxed max-h-20 overflow-y-auto line-clamp-4">
+          {equipment.description}
+        </p>
 
         {(equipment.damage || equipment.defense || equipment.proficiency || equipment.bonus) && (
           <div className="flex flex-wrap gap-2 pt-2 border-t border-border/50">

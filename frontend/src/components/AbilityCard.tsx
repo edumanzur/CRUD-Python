@@ -58,7 +58,7 @@ export const AbilityCard = ({ ability, onClick, onEdit }: AbilityCardProps) => {
           )}
         </div>
 
-        <p className="text-sm text-muted-foreground line-clamp-2 font-body">
+        <p className="text-sm text-muted-foreground max-h-20 overflow-y-auto line-clamp-4 font-body">
           {ability.description}
         </p>
 

@@ -21,10 +21,10 @@ personagem_habilidades = Table(
 
 # Tabela de associação Many-to-Many: Personagens <-> Equipamentos
 personagem_equipamentos = Table(
-    'Personagem_Equipamentos',
+    'personagens_equipamentos',
     Base.metadata,
-    Column('Personagem_id', Integer, ForeignKey('Personagens.Id'), primary_key=True),
-    Column('Equipamento_id', Integer, ForeignKey('Equipamentos.Id'), primary_key=True)
+    Column('personagem_id', Integer, ForeignKey('Personagens.Id'), primary_key=True),
+    Column('equipamento_id', Integer, ForeignKey('Equipamentos.Id'), primary_key=True)
 )
 
 

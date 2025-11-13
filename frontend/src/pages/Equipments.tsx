@@ -411,7 +411,7 @@ export default function Equipments() {
 
       {/* Equipment Details Dialog */}
       <Dialog open={!!selectedEquipment} onOpenChange={(open) => !open && setSelectedEquipment(null)}>
-        <DialogContent className="rpg-card max-w-2xl">
+        <DialogContent className="rpg-card max-w-2xl max-h-[80vh] overflow-y-auto">
           {selectedEquipment && (
             <>
               <DialogHeader>
@@ -439,7 +439,7 @@ export default function Equipments() {
                     <Package className="h-5 w-5 text-primary" />
                     <span>Description</span>
                   </h3>
-                  <DialogDescription className="text-base leading-relaxed">
+                  <DialogDescription className="text-base leading-relaxed max-h-40 overflow-y-auto pr-2">
                     {selectedEquipment.description}
                   </DialogDescription>
                 </div>

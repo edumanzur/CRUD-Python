@@ -61,7 +61,9 @@ export const SpellCard = ({ spell, onClick, onEdit }: SpellCardProps) => {
           )}
         </div>
 
-        <p className="text-sm text-foreground/80 leading-relaxed">{spell.description}</p>
+        <p className="text-sm text-foreground/80 leading-relaxed max-h-20 overflow-y-auto line-clamp-4">
+          {spell.description}
+        </p>
 
         {/* Exibir dano e cooldown se disponíveis */}
         {(spell.damage || spell.cooldown !== undefined) && (

@@ -158,6 +158,25 @@ export default function Spells() {
   const [loadingAbilities, setLoadingAbilities] = useState(true);
   const [savingAbility, setSavingAbility] = useState(false);
 
+  // Estado para classes carregadas da API
+  const [availableClasses, setAvailableClasses] = useState<string[]>(AVAILABLE_CLASSES);
+
+  // Carregar classes do backend
+  useEffect(() => {
+    const loadClasses = async () => {
+      try {
+        const classesData = await api.classes.getAll();
+        const classNames = classesData.map((c: any) => c.Nome);
+        setAvailableClasses(classNames);
+      } catch (error) {
+        console.error("Erro ao carregar classes:", error);
+        // Mantém o fallback AVAILABLE_CLASSES se houver erro
+      }
+    };
+
+    loadClasses();
+  }, []);
+
   // Carregar magias do backend filtradas por campanha
   const loadSpells = async () => {
     try {
@@ -244,11 +263,9 @@ export default function Spells() {
       const matchesCategory = categoryFilter === "all" || spell.category === categoryFilter;
       const matchesLevel = levelFilter === "all" || spell.level.toString() === levelFilter;
       
-      // Filtro por classe: se "all", mostra tudo; se uma classe, mostra magias sem restrição OU com essa classe
+      // Filtro por classe: se "all", mostra tudo; se uma classe específica, mostra APENAS as que incluem essa classe
       const matchesClass = classFilter === "all" || 
-        !spell.classes || 
-        spell.classes.length === 0 || 
-        spell.classes.includes(classFilter);
+        (spell.classes && spell.classes.includes(classFilter));
 
       return matchesSearch && matchesCategory && matchesLevel && matchesClass;
     });
@@ -263,11 +280,9 @@ export default function Spells() {
         ability.description.toLowerCase().includes(searchTermAbility.toLowerCase());
       const matchesType = typeFilter === "all" || ability.type === typeFilter;
       
-      // Filtro por classe: se "all", mostra tudo; se uma classe, mostra habilidades sem restrição OU com essa classe
+      // Filtro por classe: se "all", mostra tudo; se uma classe específica, mostra APENAS as que incluem essa classe
       const matchesClass = classFilterAbility === "all" || 
-        !ability.classes || 
-        ability.classes.length === 0 || 
-        ability.classes.includes(classFilterAbility);
+        (ability.classes && ability.classes.includes(classFilterAbility));
 
       return matchesSearch && matchesType && matchesClass;
     });
@@ -622,7 +637,7 @@ export default function Spells() {
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="all">All Classes</SelectItem>
-                  {AVAILABLE_CLASSES.map((className) => (
+                  {availableClasses.map((className) => (
                     <SelectItem key={className} value={className}>
                       {className}
                     </SelectItem>
@@ -705,7 +720,7 @@ export default function Spells() {
                     <Sparkles className="h-5 w-5 text-primary" />
                     <span>Descrição</span>
                   </h3>
-                  <DialogDescription className="text-base leading-relaxed">
+                  <DialogDescription className="text-base leading-relaxed max-h-32 overflow-y-auto pr-2">
                     {selectedSpell.description}
                   </DialogDescription>
                 </div>
@@ -880,7 +895,7 @@ export default function Spells() {
                     </SelectTrigger>
                     <SelectContent>
                       <SelectItem value="all">All Classes</SelectItem>
-                      {AVAILABLE_CLASSES.map((className) => (
+                      {availableClasses.map((className) => (
                         <SelectItem key={className} value={className}>
                           {className}
                         </SelectItem>
@@ -962,7 +977,7 @@ export default function Spells() {
                       <Sparkles className="h-5 w-5 text-primary" />
                       <span>Descrição</span>
                     </h3>
-                    <DialogDescription className="text-base leading-relaxed">
+                    <DialogDescription className="text-base leading-relaxed max-h-32 overflow-y-auto pr-2">
                       {selectedAbility.description}
                     </DialogDescription>
                   </div>
@@ -973,7 +988,7 @@ export default function Spells() {
                         <Zap className="h-5 w-5 text-primary" />
                         <span>Effect</span>
                       </h3>
-                      <DialogDescription className="text-base leading-relaxed">
+                      <DialogDescription className="text-base leading-relaxed max-h-32 overflow-y-auto pr-2">
                         {selectedAbility.effect}
                       </DialogDescription>
                     </div>
