@@ -294,7 +294,13 @@ export default function Spells() {
       
       if (isNewSpell) {
         // Criar nova magia
-        const apiSpell = await api.spells.create(toApiSpell(spell));
+        const apiData = toApiSpell(spell);
+        // Adicionar Campanha_id se houver campanha ativa
+        const apiSpellWithCampaign = activeCampaign 
+          ? { ...apiData, Campanha_id: activeCampaign.Id }
+          : apiData;
+        
+        const apiSpell = await api.spells.create(apiSpellWithCampaign);
         const converted = fromApiSpell(apiSpell);
         
         const updated = [...customSpells, converted];
@@ -304,10 +310,13 @@ export default function Spells() {
       } else {
         // Atualizar magia existente
         const id = parseInt(spell.id);
-        const apiSpell = await api.spells.update(id, {
-          Id: id,
-          ...toApiSpell(spell),
-        });
+        const apiData = toApiSpell(spell);
+        // Manter Campanha_id ao atualizar
+        const apiSpellWithCampaign = activeCampaign 
+          ? { Id: id, ...apiData, Campanha_id: activeCampaign.Id }
+          : { Id: id, ...apiData };
+        
+        const apiSpell = await api.spells.update(id, apiSpellWithCampaign);
         const converted = fromApiSpell(apiSpell);
         
         const updated = customSpells.map((s) => (s.id === spell.id ? converted : s));
@@ -391,7 +400,13 @@ export default function Spells() {
       
       if (isNewAbility) {
         // Criar nova habilidade
-        const apiAbility = await api.abilities.create(toApiAbility(ability));
+        const apiData = toApiAbility(ability);
+        // Adicionar Campanha_id se houver campanha ativa
+        const apiAbilityWithCampaign = activeCampaign 
+          ? { ...apiData, Campanha_id: activeCampaign.Id }
+          : apiData;
+        
+        const apiAbility = await api.abilities.create(apiAbilityWithCampaign);
         const converted = fromApiAbility(apiAbility);
         
         const updated = [...abilities, converted];
@@ -401,10 +416,13 @@ export default function Spells() {
       } else {
         // Atualizar habilidade existente
         const id = parseInt(ability.id);
-        const apiAbility = await api.abilities.update(id, {
-          Id: id,
-          ...toApiAbility(ability),
-        });
+        const apiData = toApiAbility(ability);
+        // Manter Campanha_id ao atualizar
+        const apiAbilityWithCampaign = activeCampaign 
+          ? { Id: id, ...apiData, Campanha_id: activeCampaign.Id }
+          : { Id: id, ...apiData };
+        
+        const apiAbility = await api.abilities.update(id, apiAbilityWithCampaign);
         const converted = fromApiAbility(apiAbility);
         
         const updated = abilities.map((a) => (a.id === ability.id ? converted : a));

@@ -5,6 +5,7 @@ import { Badge } from "@/components/ui/badge";
 import { Plus, X, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import api, { Spell as ApiSpell, Ability as ApiAbility } from "@/services/api";
+import { useCampaign } from "@/contexts/CampaignContext";
 
 interface CharacterSpellsAbilitiesManagerProps {
   characterId: string;
@@ -12,6 +13,7 @@ interface CharacterSpellsAbilitiesManagerProps {
 }
 
 export const CharacterSpellsAbilitiesManager = ({ characterId, characterClass }: CharacterSpellsAbilitiesManagerProps) => {
+  const { activeCampaign } = useCampaign(); // Hook para obter campanha ativa
   const [characterSpells, setCharacterSpells] = useState<ApiSpell[]>([]);
   const [characterAbilities, setCharacterAbilities] = useState<ApiAbility[]>([]);
   const [allSpells, setAllSpells] = useState<ApiSpell[]>([]);
@@ -32,6 +34,13 @@ export const CharacterSpellsAbilitiesManager = ({ characterId, characterClass }:
     loadData();
   }, [characterId]);
 
+  // Recarregar quando a campanha ativa mudar
+  useEffect(() => {
+    if (activeCampaign && !characterId.startsWith('temp-')) {
+      loadData();
+    }
+  }, [activeCampaign]);
+
   const loadData = async () => {
     console.log('⚡ loadData() chamado - characterId:', characterId);
     
@@ -47,12 +56,27 @@ export const CharacterSpellsAbilitiesManager = ({ characterId, characterClass }:
       console.log('🔍 Carregando dados para personagem ID:', id);
       
       // Carregar magias e habilidades do personagem
-      const [spells, abilities, allSpellsData, allAbilitiesData] = await Promise.all([
+      const [spells, abilities] = await Promise.all([
         api.characters.getSpells(id),
         api.characters.getAbilities(id),
-        api.spells.getAll(),
-        api.abilities.getAll(),
       ]);
+      
+      // Carregar TODAS as magias e habilidades da campanha ativa com fetch
+      const spellsUrl = activeCampaign 
+        ? `http://localhost:8000/magias/?campanha_id=${activeCampaign.Id}`
+        : 'http://localhost:8000/magias/';
+      
+      const abilitiesUrl = activeCampaign 
+        ? `http://localhost:8000/habilidades/?campanha_id=${activeCampaign.Id}`
+        : 'http://localhost:8000/habilidades/';
+      
+      const [spellsResponse, abilitiesResponse] = await Promise.all([
+        fetch(spellsUrl),
+        fetch(abilitiesUrl),
+      ]);
+      
+      const allSpellsData = await spellsResponse.json();
+      const allAbilitiesData = await abilitiesResponse.json();
       
       console.log('📊 Dados carregados:', {
         characterSpells: spells,
@@ -128,27 +152,35 @@ export const CharacterSpellsAbilitiesManager = ({ characterId, characterClass }:
     
     // Debug: Log da filtragem
     console.log(`🔍 Verificando magia "${spell.Nome}":`);
-    console.log(`   - Classes da magia: "${spell.Classes}"`);
+    console.log(`   - Classes da magia:`, spell.Classes, `(tipo: ${typeof spell.Classes})`);
     console.log(`   - Classe do personagem: "${characterClass}"`);
     
     // Filtrar por classe: se a magia tem classes definidas, verificar se a classe do personagem está incluída
-    // Se Classes estiver vazio/null/None, a magia está disponível para todas as classes
-    if (spell.Classes && spell.Classes !== 'None' && spell.Classes.trim() !== '') {
-      const spellClasses = spell.Classes.split(',').map(c => c.trim());
-      console.log(`   - Classes parseadas:`, spellClasses);
-      console.log(`   - Incluiu "${characterClass}"?`, spellClasses.includes(characterClass));
-      
-      if (spellClasses.length > 0 && !spellClasses.includes(characterClass)) {
-        console.log(`   ❌ Magia REJEITADA (classe incompatível)`);
-        return false;
-      }
-    } else {
-      console.log(`   ℹ️  Sem restrição de classe (disponível para todos)`);
+    // Se Classes estiver vazio/null/None/undefined, a magia está disponível para todas as classes
+    if (!spell.Classes || spell.Classes === 'None' || spell.Classes.trim() === '' || spell.Classes === 'null') {
+      console.log(`   ✅ Magia APROVADA (sem restrição de classe)`);
+      return true;
+    }
+    
+    const spellClasses = spell.Classes.split(',').map(c => c.trim());
+    console.log(`   - Classes parseadas:`, spellClasses);
+    console.log(`   - Incluiu "${characterClass}"?`, spellClasses.includes(characterClass));
+    
+    if (spellClasses.length > 0 && !spellClasses.includes(characterClass)) {
+      console.log(`   ❌ Magia REJEITADA (classe incompatível)`);
+      return false;
     }
     
     console.log(`   ✅ Magia APROVADA`);
     return true;
   });
+
+  // Log ANTES do filtro para ver o que temos
+  console.log('🎯 ANTES DO FILTRO DE HABILIDADES:');
+  console.log('   - allAbilities:', allAbilities);
+  console.log('   - allAbilities.length:', allAbilities.length);
+  console.log('   - characterAbilities:', characterAbilities);
+  console.log('   - characterClass:', characterClass);
 
   const availableAbilities = allAbilities.filter(ability => {
     // Filtrar habilidades já adicionadas
@@ -156,22 +188,23 @@ export const CharacterSpellsAbilitiesManager = ({ characterId, characterClass }:
     
     // Debug: Log da filtragem
     console.log(`🔍 Verificando habilidade "${ability.Nome}":`);
-    console.log(`   - Classes da habilidade: "${ability.Classes}"`);
+    console.log(`   - Classes da habilidade:`, ability.Classes, `(tipo: ${typeof ability.Classes})`);
     console.log(`   - Classe do personagem: "${characterClass}"`);
     
     // Filtrar por classe: se a habilidade tem classes definidas, verificar se a classe do personagem está incluída
-    // Se Classes estiver vazio/null/None, a habilidade está disponível para todas as classes
-    if (ability.Classes && ability.Classes !== 'None' && ability.Classes.trim() !== '') {
-      const abilityClasses = ability.Classes.split(',').map(c => c.trim());
-      console.log(`   - Classes parseadas:`, abilityClasses);
-      console.log(`   - Incluiu "${characterClass}"?`, abilityClasses.includes(characterClass));
-      
-      if (abilityClasses.length > 0 && !abilityClasses.includes(characterClass)) {
-        console.log(`   ❌ Habilidade REJEITADA (classe incompatível)`);
-        return false;
-      }
-    } else {
-      console.log(`   ℹ️  Sem restrição de classe (disponível para todos)`);
+    // Se Classes estiver vazio/null/None/undefined, a habilidade está disponível para todas as classes
+    if (!ability.Classes || ability.Classes === 'None' || ability.Classes.trim() === '' || ability.Classes === 'null') {
+      console.log(`   ✅ Habilidade APROVADA (sem restrição de classe)`);
+      return true;
+    }
+    
+    const abilityClasses = ability.Classes.split(',').map(c => c.trim());
+    console.log(`   - Classes parseadas:`, abilityClasses);
+    console.log(`   - Incluiu "${characterClass}"?`, abilityClasses.includes(characterClass));
+    
+    if (abilityClasses.length > 0 && !abilityClasses.includes(characterClass)) {
+      console.log(`   ❌ Habilidade REJEITADA (classe incompatível)`);
+      return false;
     }
     
     console.log(`   ✅ Habilidade APROVADA`);

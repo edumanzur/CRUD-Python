@@ -5,12 +5,14 @@ import { Badge } from "@/components/ui/badge";
 import { Plus, X, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import api, { Equipment as ApiEquipment } from "@/services/api";
+import { useCampaign } from "@/contexts/CampaignContext";
 
 interface CharacterEquipmentsManagerProps {
   characterId: string;
 }
 
 export const CharacterEquipmentsManager = ({ characterId }: CharacterEquipmentsManagerProps) => {
+  const { activeCampaign } = useCampaign(); // Hook para obter campanha ativa
   const [characterEquipments, setCharacterEquipments] = useState<ApiEquipment[]>([]);
   const [allEquipments, setAllEquipments] = useState<ApiEquipment[]>([]);
   
@@ -21,6 +23,13 @@ export const CharacterEquipmentsManager = ({ characterId }: CharacterEquipmentsM
     loadData();
   }, [characterId]);
 
+  // Recarregar quando a campanha ativa mudar
+  useEffect(() => {
+    if (activeCampaign && !characterId.startsWith('temp-')) {
+      loadData();
+    }
+  }, [activeCampaign]);
+
   const loadData = async () => {
     if (characterId.startsWith('temp-')) return;
     
@@ -30,11 +39,16 @@ export const CharacterEquipmentsManager = ({ characterId }: CharacterEquipmentsM
       
       console.log('🔍 Carregando equipamentos para personagem ID:', id);
       
-      // Carregar equipamentos do personagem e todos os equipamentos disponíveis
-      const [equipments, allEquipmentsData] = await Promise.all([
-        api.characters.getEquipments(id),
-        api.equipments.getAll(),
-      ]);
+      // Carregar equipamentos do personagem
+      const equipments = await api.characters.getEquipments(id);
+      
+      // Carregar TODOS os equipamentos da campanha ativa com fetch
+      const equipmentsUrl = activeCampaign 
+        ? `http://localhost:8000/equipamentos/?campanha_id=${activeCampaign.Id}`
+        : 'http://localhost:8000/equipamentos/';
+      
+      const equipmentsResponse = await fetch(equipmentsUrl);
+      const allEquipmentsData = await equipmentsResponse.json();
       
       console.log('📊 Equipamentos carregados:', {
         characterEquipments: equipments,

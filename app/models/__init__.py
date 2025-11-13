@@ -5,18 +5,18 @@ from app.database import Base
 
 # Tabela de associação Many-to-Many: Personagens <-> Magias
 personagem_magias = Table(
-    'Personagem_Magias',
+    'personagens_magias',
     Base.metadata,
-    Column('Personagem_id', Integer, ForeignKey('Personagens.Id'), primary_key=True),
-    Column('Magia_id', Integer, ForeignKey('Magias.Id'), primary_key=True)
+    Column('personagem_id', Integer, ForeignKey('Personagens.Id'), primary_key=True),
+    Column('magia_id', Integer, ForeignKey('Magias.Id'), primary_key=True)
 )
 
 # Tabela de associação Many-to-Many: Personagens <-> Habilidades
 personagem_habilidades = Table(
-    'Personagem_Habilidades',
+    'personagens_habilidades',
     Base.metadata,
-    Column('Personagem_id', Integer, ForeignKey('Personagens.Id'), primary_key=True),
-    Column('Habilidade_id', Integer, ForeignKey('Habilidades.Id'), primary_key=True)
+    Column('personagem_id', Integer, ForeignKey('Personagens.Id'), primary_key=True),
+    Column('habilidade_id', Integer, ForeignKey('Habilidades.Id'), primary_key=True)
 )
 
 # Tabela de associação Many-to-Many: Personagens <-> Equipamentos

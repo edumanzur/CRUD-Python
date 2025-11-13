@@ -3,7 +3,7 @@ from fastapi import FastAPI, HTTPException, Depends, Query, Body, UploadFile, Fi
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
-from sqlalchemy import create_engine, Column, Integer, String, Text, ForeignKey
+from sqlalchemy import create_engine, Column, Integer, String, Text, ForeignKey, Table
 from sqlalchemy.orm import declarative_base, sessionmaker, relationship, Session
 import os
 import shutil
@@ -94,6 +94,13 @@ class MagiasModel(Base):
     Classes = Column(String)  # Classes que podem usar (separadas por vírgula)
     Modificador = Column(String)  # Atributo do personagem usado como modificador (Força, Destreza, etc.)
     Campanha_id = Column(Integer, nullable=True)  # Campanha à qual pertence
+    
+    # Relacionamento Many-to-Many com Personagens
+    personagens = relationship(
+        "PersonagensModel",
+        secondary="personagens_magias",
+        back_populates="magias"
+    )
 
 
 class HabilidadesModel(Base):
@@ -109,6 +116,13 @@ class HabilidadesModel(Base):
     Classes = Column(String)  # Classes que podem usar (separadas por vírgula)
     Modificador = Column(String)  # Atributo do personagem usado como modificador (Força, Destreza, etc.)
     Campanha_id = Column(Integer, nullable=True)  # Campanha à qual pertence
+    
+    # Relacionamento Many-to-Many com Personagens
+    personagens = relationship(
+        "PersonagensModel",
+        secondary="personagens_habilidades",
+        back_populates="habilidades"
+    )
 
 
 class ClasseModel(Base):
@@ -122,6 +136,22 @@ class ClasseModel(Base):
     habilidades = relationship("HabilidadesModel")
     magias = relationship("MagiasModel")
     personagens = relationship("PersonagensModel", back_populates="classe")
+
+
+# Tabelas de associação Many-to-Many
+personagens_magias = Table(
+    'personagens_magias',
+    Base.metadata,
+    Column('personagem_id', Integer, ForeignKey('Personagens.Id'), primary_key=True),
+    Column('magia_id', Integer, ForeignKey('Magias.Id'), primary_key=True)
+)
+
+personagens_habilidades = Table(
+    'personagens_habilidades',
+    Base.metadata,
+    Column('personagem_id', Integer, ForeignKey('Personagens.Id'), primary_key=True),
+    Column('habilidade_id', Integer, ForeignKey('Habilidades.Id'), primary_key=True)
+)
 
 
 class PersonagensModel(Base):
@@ -166,6 +196,17 @@ class PersonagensModel(Base):
         back_populates="personagem",
         cascade="all, delete-orphan",
         uselist=True
+    )
+    # Relacionamentos Many-to-Many com Magias e Habilidades
+    magias = relationship(
+        "MagiasModel",
+        secondary=personagens_magias,
+        back_populates="personagens"
+    )
+    habilidades = relationship(
+        "HabilidadesModel",
+        secondary=personagens_habilidades,
+        back_populates="personagens"
     )
 
 

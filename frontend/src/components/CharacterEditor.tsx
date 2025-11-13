@@ -235,46 +235,54 @@ export const CharacterEditor = ({ character, onSave, onDelete, disabled = false 
             </div>
 
             {/* Campos específicos para Monstros */}
-            {editedCharacter.type === "Monstro" && (
+            {/* DEBUG: type = {editedCharacter.type} */}
+            {(editedCharacter.type === "Monstro" || editedCharacter.class === "Nenhuma") && (
               <>
-                <div>
-                  <Label className="font-heading font-semibold">Experiência (EXP)</Label>
-                  <Input
-                    type="number"
-                    value={editedCharacter.exp || 0}
-                    onChange={(e) => setEditedCharacter({ 
-                      ...editedCharacter, 
-                      exp: parseInt(e.target.value) || 0 
-                    })}
-                    className="mt-1 font-body"
-                    placeholder="XP dado ao derrotar"
-                  />
-                </div>
+                <div className="col-span-2 bg-red-500/10 border border-red-500/30 rounded-lg p-4">
+                  <h3 className="font-heading font-bold text-lg mb-3 text-red-700">
+                    Atributos de Monstro
+                  </h3>
+                  <div className="space-y-4">
+                    <div>
+                      <Label className="font-heading font-semibold">Experiência (EXP)</Label>
+                      <Input
+                        type="number"
+                        value={editedCharacter.exp || 0}
+                        onChange={(e) => setEditedCharacter({ 
+                          ...editedCharacter, 
+                          exp: parseInt(e.target.value) || 0 
+                        })}
+                        className="mt-1 font-body"
+                        placeholder="XP dado ao derrotar"
+                      />
+                    </div>
 
-                <div>
-                  <Label className="font-heading font-semibold">Imunidades</Label>
-                  <Input
-                    value={editedCharacter.imunidade || ""}
-                    onChange={(e) => setEditedCharacter({ 
-                      ...editedCharacter, 
-                      imunidade: e.target.value 
-                    })}
-                    className="mt-1 font-body"
-                    placeholder="Ex: Fogo, Veneno, Atordoamento"
-                  />
-                </div>
+                    <div>
+                      <Label className="font-heading font-semibold">Imunidades</Label>
+                      <Input
+                        value={editedCharacter.imunidade || ""}
+                        onChange={(e) => setEditedCharacter({ 
+                          ...editedCharacter, 
+                          imunidade: e.target.value 
+                        })}
+                        className="mt-1 font-body"
+                        placeholder="Ex: Fogo, Veneno, Atordoamento"
+                      />
+                    </div>
 
-                <div>
-                  <Label className="font-heading font-semibold">Resistências</Label>
-                  <Input
-                    value={editedCharacter.resistencia || ""}
-                    onChange={(e) => setEditedCharacter({ 
-                      ...editedCharacter, 
-                      resistencia: e.target.value 
-                    })}
-                    className="mt-1 font-body"
-                    placeholder="Ex: Gelo, Trovão, Cortante"
-                  />
+                    <div>
+                      <Label className="font-heading font-semibold">Resistências</Label>
+                      <Input
+                        value={editedCharacter.resistencia || ""}
+                        onChange={(e) => setEditedCharacter({ 
+                          ...editedCharacter, 
+                          resistencia: e.target.value 
+                        })}
+                        className="mt-1 font-body"
+                        placeholder="Ex: Gelo, Trovão, Cortante"
+                      />
+                    </div>
+                  </div>
                 </div>
               </>
             )}
